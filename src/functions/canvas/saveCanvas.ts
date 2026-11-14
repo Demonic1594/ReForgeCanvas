@@ -6,9 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { loadImage } from '@napi-rs/canvas';
 
-import { writeFileSync } from 'node:fs';
-
-import { ImageManager, ImageFormat, ForgeCanvasError } from '../..';
+import { imageManagerOf, ImageFormat, ForgeCanvasError, loaderFailure, policyOf, writeLocal } from '../..';
 
 export default new NativeFunction({
     name: '$saveCanvas',
@@ -27,7 +25,7 @@ export default new NativeFunction({
         },
         {
             name: 'path',
-            description: 'Path to a directory. (including the canvas file name and extension)',
+            description: 'Path of the file to write (inside the extension\'s files.write folder), or images://name',
             type: ArgType.String,
             required: true,
             rest: false
@@ -47,15 +45,17 @@ export default new NativeFunction({
         if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
         if (!path) return this.customError(ForgeCanvasError.NoPath);
 
-        const format: any = `image/${(typeof f === 'number' ? ImageFormat[f] : f) ?? 'png'}`;
+        // CanvasBuilder.encode takes the format name ('png'), not a MIME type ('image/png' threw in 1.3.1)
+        const format: any = (typeof f === 'number' ? ImageFormat[f] : f) ?? 'png';
 
         if (path.startsWith('images://')) {
-            if (!ctx.imageManager) ctx.imageManager = new ImageManager();
-            ctx.imageManager.set(
+            imageManagerOf(ctx).set(
                 path.slice(9),
                 await loadImage(await canvas.encode(format))
             );
-        } else writeFileSync(path, await canvas.encode(format));
+        } else try {
+            await writeLocal(path, await canvas.encode(format), policyOf(ctx.client));
+        } catch (e) { return loaderFailure(this, e, ForgeCanvasError.WriteFail) }
         return this.success();
     }
 });

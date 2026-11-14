@@ -40,21 +40,39 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ForgeCanvas = exports.version = void 0;
+exports.ReForgeCanvas = exports.version = void 0;
 const forgescript_1 = require("@tryforge/forgescript");
 const classes_1 = require("./classes");
+const loader_1 = require("./structures/loader");
 const pkg = __importStar(require("../package.json"));
 exports.version = pkg.version;
-class ForgeCanvas extends forgescript_1.ForgeExtension {
-    name = 'forge.canvas';
+/** The name the original ForgeCanvas registers; both define the same functions. */
+const UPSTREAM_NAME = 'forge.canvas';
+class ReForgeCanvas extends forgescript_1.ForgeExtension {
+    name = 'reforge.canvas';
     description = pkg.description;
     version = exports.version;
+    /** The resolved loader policy of this bot (defaults filled in). */
+    policy;
+    constructor(options = {}) {
+        super();
+        this.policy = (0, loader_1.resolvePolicy)(options);
+    }
     init(client) {
+        const upstream = client.options.extensions?.filter(x => x !== this && x?.name === UPSTREAM_NAME) ?? [];
+        if (upstream.length) {
+            forgescript_1.Logger.error(`${loader_1.LOG_PREFIX} ForgeCanvas (@tryforge/forge.canvas) is loaded next to ReForgeCanvas. Both define the same functions; ` +
+                'ReForgeCanvas keeps its own and ForgeCanvas is not started. Remove @tryforge/forge.canvas from the extensions.');
+            // Extensions listed after this one have not started yet: keep them from replacing the hardened functions.
+            for (const ext of upstream)
+                ext.init = () => { };
+        }
+        (0, loader_1.setPolicy)(client, this.policy);
         this.load(__dirname + '/functions');
-        client.preloadImages = new classes_1.ImageManager();
+        client.preloadImages = new classes_1.ImageManager(this.policy);
     }
     static components = new classes_1.ComponentManager();
 }
-exports.ForgeCanvas = ForgeCanvas;
+exports.ReForgeCanvas = ReForgeCanvas;
 __exportStar(require("./structures"), exports);
 __exportStar(require("./classes"), exports);

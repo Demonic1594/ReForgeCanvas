@@ -1,10 +1,14 @@
 import { ForgeClient, ForgeExtension } from '@tryforge/forgescript';
 import { CanvasManager, ComponentManager, GIFManager, GradientManager, ImageManager, LottieManager, NeuQuantManager } from './classes';
+import { IReForgeCanvasOptions, LoaderPolicy } from './structures/loader';
 export declare const version: string;
-export declare class ForgeCanvas extends ForgeExtension {
+export declare class ReForgeCanvas extends ForgeExtension {
     name: string;
     description: string;
     version: string;
+    /** The resolved loader policy of this bot (defaults filled in). */
+    readonly policy: LoaderPolicy;
+    constructor(options?: IReForgeCanvasOptions);
     init(client: ForgeClient): void;
     static components: ComponentManager;
 }

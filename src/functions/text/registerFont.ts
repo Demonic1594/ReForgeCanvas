@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { registerFonts } from '../..';
+import { ForgeCanvasError, LoaderError, loaderFailure, policyOf, registerFonts } from '../..';
 
 export default new NativeFunction({
     name: '$registerFont',
@@ -16,7 +16,7 @@ export default new NativeFunction({
     args: [
         {
             name: 'src',
-            description: 'The font source path',
+            description: 'The font source: a URL (font file or stylesheet), or a path inside files.read',
             type: ArgType.String,
             required: true,
             rest: false
@@ -36,14 +36,16 @@ export default new NativeFunction({
             rest: false
         }
     ],
-    async execute (_, [src, name, log]) {
+    async execute (ctx, [src, name, log]) {
         try {
             return this.success(await registerFonts(
                 [{ src: src, name }],
-                log ?? false
+                log ?? false,
+                policyOf(ctx.client)
             ));
         } catch(e: any) {
-            return this.customError(e);
+            if (e instanceof LoaderError) return loaderFailure(this, e, ForgeCanvasError.FontFail);
+            return this.customError(e?.message ?? String(e));
         }
     }
 });

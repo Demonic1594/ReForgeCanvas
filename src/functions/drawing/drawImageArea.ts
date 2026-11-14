@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
-import { FillOrStrokeOrClear, ForgeCanvasError, ImageManager, resolveImage, resolveStyle } from '../..';
+import { FillOrStrokeOrClear, ForgeCanvasError, imageManagerOf, isStyleSource, resolveImage, resolveStyle } from '../..';
 
 export default new NativeFunction({
     name: '$drawImageArea',
@@ -93,8 +93,7 @@ export default new NativeFunction({
         }
     ],
     async execute(ctx, [name, src, srcx, srcy, srcwidth, srcheight, x, y, width, height, radius]) {
-        const manager = ctx.imageManager instanceof ImageManager ?
-            ctx.imageManager : ctx.imageManager = new ImageManager();
+        const manager = imageManagerOf(ctx);
         
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
@@ -104,10 +103,11 @@ export default new NativeFunction({
         width = num(width);
         height = num(height);
 
-        const img = await resolveImage(this, ctx, src);
-        if (img instanceof Return) {
+        const img = isStyleSource(src) ? null : await resolveImage(this, ctx, src);
+        if (img instanceof Return) return img;
+        if (img === null) {
             const style = await resolveStyle(this, ctx, canvas, src);
-            if (style instanceof Return) return img;
+            if (style instanceof Return) return style;
 
             canvas.ctx.fillStyle = style;
             canvas.rect(

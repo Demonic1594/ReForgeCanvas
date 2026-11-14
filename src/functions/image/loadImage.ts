@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
-import { ImageManager, resolveImage } from '../..';
+import { imageManagerOf, resolveImage } from '../..';
 
 export default new NativeFunction({
     name: '$loadImage',
@@ -30,13 +30,12 @@ export default new NativeFunction({
         }
     ],
     async execute (ctx, [name, src]) {
-        if (!(ctx.imageManager instanceof ImageManager))
-            ctx.imageManager = new ImageManager();
+        const manager = imageManagerOf(ctx);
 
         const img = await resolveImage(this, ctx, src);
         if (img instanceof Return) return img;
 
-        ctx.imageManager.map.set(name, img);
+        manager.set(name, img);
         return this.success();
     }
 });

@@ -2,6 +2,7 @@ import { CanvasGradient, Image, LottieAnimation, LoadImageOptions } from '@napi-
 import { DecodeOptions, Decoder, Encoder, Frame, NeuQuant } from '@gifsx/gifsx';
 import { ForgeFunction, IForgeFunction } from '@tryforge/forgescript';
 import { CanvasBuilder, GradientType } from '..';
+import { FetchOptions, ImageSource, LoaderPolicy } from '../structures/loader';
 declare class Manager<T> {
     map: Map<string, T>;
     constructor();
@@ -47,10 +48,18 @@ export declare class GradientManager extends Manager<CanvasGradient> {
 }
 export declare class ImageManager extends Manager<Image> {
     loadOptions?: LoadImageOptions;
+    /** The loader policy this manager's loads follow (the bot's, or the strict defaults). */
+    policy: LoaderPolicy;
+    /** Names stored by the automatic cache, oldest first; capped by policy.cache.maxImages. */
+    private cached;
+    constructor(policy?: LoaderPolicy);
     set(name: string, image: Image): void;
-    load(src: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL): Promise<Image>;
-    load(name: string, src: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL): Promise<Image>;
-    tryGet(name: string, src: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL): Promise<Image>;
+    /** Stores an image the extension cached by itself (emojis, URLs, patterns); the oldest go first. */
+    cache(name: string, image: Image): void;
+    remove(name: string): void;
+    load(src: ImageSource, fetchOptions?: FetchOptions): Promise<Image>;
+    load(name: string, src: ImageSource, fetchOptions?: FetchOptions): Promise<Image>;
+    tryGet(name: string, src: ImageSource, fetchOptions?: FetchOptions): Promise<Image>;
 }
 export declare class NeuQuantManager extends Manager<NeuQuant> {
     set(name: string, nq: NeuQuant): void;

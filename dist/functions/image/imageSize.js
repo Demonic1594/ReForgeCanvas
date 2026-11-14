@@ -44,7 +44,12 @@ exports.default = new forgescript_1.NativeFunction({
         else if (path.startsWith('preload://'))
             image = ctx.client.preloadImages.get(path);
         else
-            image = await ctx.imageManager?.load(path);
+            try {
+                image = await (0, __1.imageManagerOf)(ctx).load(path);
+            }
+            catch (e) {
+                return (0, __1.loaderFailure)(this, e);
+            }
         if (!image)
             return this.customError("Failed to load an image" /* ForgeCanvasError.ImageFail */);
         return this.success(property !== null && property !== undefined // @ts-ignore

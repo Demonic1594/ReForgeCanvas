@@ -1,16 +1,20 @@
 {
-  "name": "@tryforge/forge.canvas",
-  "version": "1.3.1",
-  "description": "A ForgeScript extension allowing you to create and edit images with ease.",
+  "name": "@tryforge/reforge.canvas",
+  "version": "2.0.0",
+  "description": "ReForgeCanvas: a hardened ForgeScript canvas extension. Create and edit images with limits on what user text can fetch, read or write. Fork of tryforge/ForgeCanvas.",
   "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "docgen": "node dist/docgen",
+    "license": "node dist/@build/license.js",
+    "test": "node --test --test-reporter=spec \"test/*.test.js\"",
+    "lint": "tsc --noEmit && node scripts/lint.js",
     "prepublish": "tsc && npm run license && typedoc src/index.ts && node dist/docgen",
-    "test": "swc src -d dist --strip-leading-paths && node --env-file=.env dist/__tests__/index.js",
-    "license": "node dist/@build/license.js"
+    "bot": "swc src -d dist --strip-leading-paths && node --env-file=.env dist/__tests__/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tryforge/ForgeCanvas.git"
+    "url": "git+https://github.com/Demonic1594/ReForgeCanvas.git"
   },
   "keywords": [
     "forgescript",
@@ -20,14 +24,16 @@
     "image",
     "png",
     "jpeg",
-    "gif"
+    "gif",
+    "reforge",
+    "hardened"
   ],
-  "author": "lordex",
+  "author": "lordex (ForgeCanvas); ReForgeCanvas fork maintainers",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/tryforge/ForgeCanvas/issues"
+    "url": "https://github.com/Demonic1594/ReForgeCanvas/issues"
   },
-  "homepage": "https://github.com/tryforge/ForgeCanvas#readme",
+  "homepage": "https://github.com/Demonic1594/ReForgeCanvas#readme",
   "dependencies": {
     "@gifsx/gifsx": "^1.0.15",
     "@napi-rs/canvas": "^1.0.9"
@@ -44,5 +50,16 @@
   },
   "trustedDependencies": [
     "@swc/core"
-  ]
+  ],
+  "files": [
+    "dist/**/*",
+    "metadata/**/*",
+    "assets/**/*",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
 }

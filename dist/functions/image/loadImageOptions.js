@@ -30,23 +30,21 @@ exports.default = new forgescript_1.NativeFunction({
         },
         {
             name: 'maxRedirects',
-            description: 'Sets the limit of redirects the loader allows during fetching; Unlimited if none provided',
+            description: 'Lowers the number of redirects followed while fetching; Cannot go above the extension\'s network.maxRedirects (5 by default)',
             type: forgescript_1.ArgType.Number,
             required: false,
             rest: false
         },
         {
             name: 'requestOptions',
-            description: 'Sets the loader\'s fetch options',
+            description: 'Sets the loader\'s fetch options; Only headers are used',
             type: forgescript_1.ArgType.Json,
             required: false,
             rest: false
         }
     ],
     async execute(ctx, [g, alt, max, opts]) {
-        const manager = !g ? (ctx.imageManager instanceof __1.ImageManager ?
-            ctx.imageManager : ctx.imageManager = new __1.ImageManager())
-            : ctx.client.preloadImages;
+        const manager = !g ? (0, __1.imageManagerOf)(ctx) : ctx.client.preloadImages;
         if (!alt && !max && !opts)
             return this.successJSON(manager.loadOptions ?? {});
         const options = {};

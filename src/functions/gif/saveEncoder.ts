@@ -4,8 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { writeFileSync } from 'node:fs';
-import { ForgeCanvasError } from '../..';
+import { ForgeCanvasError, loaderFailure, policyOf, writeLocal } from '../..';
 
 export default new NativeFunction({
     name: '$saveEncoder',
@@ -32,19 +31,21 @@ export default new NativeFunction({
         },
         {
             name: 'path',
-            description: 'Path to a directory (including the canvas file name)',
+            description: 'Path of the file to write (inside the extension\'s files.write folder)',
             type: ArgType.String,
             required: true,
             rest: false
         }
     ],
-    execute (ctx, [name, path]) {
+    async execute (ctx, [name, path]) {
         const gif = ctx.gifManager?.getEncoderOrCurrent(name);
 
         if (!gif) return this.customError(ForgeCanvasError.NoEncoder);
         if (!path) return this.customError(ForgeCanvasError.NoPath);
 
-        writeFileSync(path, gif.getBuffer());
+        try {
+            await writeLocal(path, gif.getBuffer(), policyOf(ctx.client));
+        } catch (e) { return loaderFailure(this, e, ForgeCanvasError.WriteFail) }
         return this.success();
     }
 });

@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.wordWidthCache = exports.charWidthCache = exports.CanvasBuilder = void 0;
 const canvas_1 = require("@napi-rs/canvas");
 const __1 = require("..");
+const loader_1 = require("../structures/loader");
 const gifsx_1 = require("@gifsx/gifsx");
 class CanvasBuilder {
     /**
@@ -286,7 +287,7 @@ class CanvasBuilder {
         const ctx = this.ctx;
         if (!(image instanceof canvas_1.Image))
             image = manager ? await manager.load(image)
-                : await (0, canvas_1.loadImage)(image);
+                : await (0, loader_1.loadImageFrom)(image, loader_1.DEFAULT_POLICY);
         width ??= srcWidth ?? image.width;
         height ??= srcHeight ?? image.height;
         [x, y] = this.align(x, y, width, height);

@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { LoadImageOptions } from '@napi-rs/canvas';
 
-import { ImageManager } from '../..';
+import { imageManagerOf } from '../..';
 
 export default new NativeFunction({
     name: '$loadImageOptions',
@@ -32,23 +32,21 @@ export default new NativeFunction({
         },
         {
             name: 'maxRedirects',
-            description: 'Sets the limit of redirects the loader allows during fetching; Unlimited if none provided',
+            description: 'Lowers the number of redirects followed while fetching; Cannot go above the extension\'s network.maxRedirects (5 by default)',
             type: ArgType.Number,
             required: false,
             rest: false
         },
         {
             name: 'requestOptions',
-            description: 'Sets the loader\'s fetch options',
+            description: 'Sets the loader\'s fetch options; Only headers are used',
             type: ArgType.Json,
             required: false,
             rest: false
         }
     ],
     async execute (ctx, [g, alt, max, opts]) {
-        const manager = !g ? (ctx.imageManager instanceof ImageManager ?
-                ctx.imageManager : ctx.imageManager = new ImageManager())
-            : ctx.client.preloadImages;
+        const manager = !g ? imageManagerOf(ctx) : ctx.client.preloadImages;
 
         if (!alt && !max && !opts) return this.successJSON(manager.loadOptions ?? {});
 

@@ -6,7 +6,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const forgescript_1 = require("@tryforge/forgescript");
 const canvas_1 = require("@napi-rs/canvas");
-const node_fs_1 = require("node:fs");
 const __1 = require("../..");
 exports.default = new forgescript_1.NativeFunction({
     name: '$saveCanvas',
@@ -25,7 +24,7 @@ exports.default = new forgescript_1.NativeFunction({
         },
         {
             name: 'path',
-            description: 'Path to a directory. (including the canvas file name and extension)',
+            description: 'Path of the file to write (inside the extension\'s files.write folder), or images://name',
             type: forgescript_1.ArgType.String,
             required: true,
             rest: false
@@ -45,14 +44,18 @@ exports.default = new forgescript_1.NativeFunction({
             return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
         if (!path)
             return this.customError("No path provided" /* ForgeCanvasError.NoPath */);
-        const format = `image/${(typeof f === 'number' ? __1.ImageFormat[f] : f) ?? 'png'}`;
+        // CanvasBuilder.encode takes the format name ('png'), not a MIME type ('image/png' threw in 1.3.1)
+        const format = (typeof f === 'number' ? __1.ImageFormat[f] : f) ?? 'png';
         if (path.startsWith('images://')) {
-            if (!ctx.imageManager)
-                ctx.imageManager = new __1.ImageManager();
-            ctx.imageManager.set(path.slice(9), await (0, canvas_1.loadImage)(await canvas.encode(format)));
+            (0, __1.imageManagerOf)(ctx).set(path.slice(9), await (0, canvas_1.loadImage)(await canvas.encode(format)));
         }
         else
-            (0, node_fs_1.writeFileSync)(path, await canvas.encode(format));
+            try {
+                await (0, __1.writeLocal)(path, await canvas.encode(format), (0, __1.policyOf)(ctx.client));
+            }
+            catch (e) {
+                return (0, __1.loaderFailure)(this, e, "Failed to save the file" /* ForgeCanvasError.WriteFail */);
+            }
         return this.success();
     }
 });

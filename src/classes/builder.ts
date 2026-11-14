@@ -3,7 +3,7 @@
 * Copyright © 2026 BotForge
 */
 
-import { Canvas, createCanvas, Image, loadImage, SKRSContext2D } from '@napi-rs/canvas';
+import { Canvas, createCanvas, Image, SKRSContext2D } from '@napi-rs/canvas';
 import {
     FillOrStroke,
     FillOrStrokeOrClear,
@@ -25,6 +25,7 @@ import {
     ImageFormat,
     ImageManager,
 } from '..';
+import { DEFAULT_POLICY, loadImageFrom } from '../structures/loader';
 import { hexToRgba, rgbaToHex } from '@gifsx/gifsx';
 
 export class CanvasBuilder {
@@ -370,7 +371,7 @@ export class CanvasBuilder {
 
         if (!(image instanceof Image))
             image = manager ? await manager.load(image)
-                : await loadImage(image);
+                : await loadImageFrom(image, DEFAULT_POLICY);
 
         width ??= srcWidth ?? image.width;
         height ??= srcHeight ?? image.height;
