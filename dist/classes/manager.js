@@ -10,6 +10,7 @@ const forgescript_1 = require("@tryforge/forgescript");
 const node_fs_1 = require("node:fs");
 const node_path_1 = require("node:path");
 const __1 = require("..");
+const logger_1 = require("../structures/logger");
 const loader_1 = require("../structures/loader");
 class Manager {
     map;
@@ -125,8 +126,11 @@ class ImageManager extends Manager {
     }
     async tryGet(name, src, fetchOptions) {
         const image = this.map.get(name);
-        if (image)
+        if (image) {
+            if (logger_1.log.enabled('debug'))
+                logger_1.log.debug(`cache hit: ${/^https?:/i.test(name) ? (0, loader_1.describeUrl)(name) : name}`);
             return image;
+        }
         return this.load(name, src, fetchOptions ?? {});
     }
 }
@@ -150,9 +154,11 @@ class ComponentManager extends Manager {
         component?.data?.name ?? component.name, component instanceof forgescript_1.ForgeFunction
             ? component : new forgescript_1.ForgeFunction(component));
     }
-    load(path, log) {
-        if (!(0, node_fs_1.existsSync)(path))
-            throw forgescript_1.Logger.error(`Component ${path} does not exist`);
+    load(path, verbose) {
+        if (!(0, node_fs_1.existsSync)(path)) {
+            logger_1.log.error(`Component ${path} does not exist`);
+            throw new Error(`${logger_1.LOG_PREFIX} Component ${path} does not exist`);
+        }
         if ((0, node_fs_1.statSync)(path).isFile()) {
             if (!path.endsWith('.js'))
                 return;
@@ -161,16 +167,17 @@ class ComponentManager extends Manager {
                 const r = require(path);
                 const component = r?.default ?? r;
                 this.set(component);
-                if (log)
-                    forgescript_1.Logger.info(`Successfully loaded component: ${component.data?.name ?? component.name}`);
+                if (verbose)
+                    logger_1.log.print(`Successfully loaded component: ${component.data?.name ?? component.name}`);
             }
             catch (error) {
-                throw forgescript_1.Logger.error(`Failed to load component ${path}: ${error}`);
+                logger_1.log.error(`Failed to load component ${path}: ${error}`);
+                throw new Error(`${logger_1.LOG_PREFIX} Failed to load component ${path}: ${error}`);
             }
         }
         else
             for (const child of (0, node_fs_1.readdirSync)(path))
-                this.load((0, node_path_1.join)(path, child), log);
+                this.load((0, node_path_1.join)(path, child), verbose);
     }
 }
 exports.ComponentManager = ComponentManager;

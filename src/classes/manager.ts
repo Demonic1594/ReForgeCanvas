@@ -12,7 +12,8 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { CanvasBuilder, GradientType } from '..';
-import { DEFAULT_POLICY, FetchOptions, ImageSource, LoaderPolicy, loadImageFrom } from '../structures/loader';
+import { log, LOG_PREFIX } from '../structures/logger';
+import { describeUrl, DEFAULT_POLICY, FetchOptions, ImageSource, LoaderPolicy, loadImageFrom } from '../structures/loader';
 
 class Manager<T> {
     public map: Map<string, T>;
@@ -154,7 +155,10 @@ export class ImageManager extends Manager<Image> {
 
     public async tryGet(name: string, src: ImageSource, fetchOptions?: FetchOptions) {
         const image = this.map.get(name);
-        if (image) return image;
+        if (image) {
+            if (log.enabled('debug')) log.debug(`cache hit: ${/^https?:/i.test(name) ? describeUrl(name) : name}`);
+            return image;
+        }
         return this.load(name, src, fetchOptions ?? {});
     }
 }
@@ -182,8 +186,8 @@ export class ComponentManager extends Manager<ForgeFunction> {
         );
     }
 
-    public load(path: string, log?: boolean) {
-        if (!existsSync(path)) throw Logger.error(`Component ${path} does not exist`);
+    public load(path: string, verbose?: boolean) {
+        if (!existsSync(path)) { log.error(`Component ${path} does not exist`); throw new Error(`${LOG_PREFIX} Component ${path} does not exist`) }
         if (statSync(path).isFile()) {
             if(!path.endsWith('.js')) return;
             try {
@@ -191,9 +195,9 @@ export class ComponentManager extends Manager<ForgeFunction> {
                 const r = require(path);
                 const component = r?.default ?? r;
                 this.set(component);
-                if (log) Logger.info(`Successfully loaded component: ${component.data?.name ?? component.name}`);
-            } catch (error) { throw Logger.error(`Failed to load component ${path}: ${error}`) }
+                if (verbose) log.print(`Successfully loaded component: ${component.data?.name ?? component.name}`);
+            } catch (error) { log.error(`Failed to load component ${path}: ${error}`); throw new Error(`${LOG_PREFIX} Failed to load component ${path}: ${error}`) }
         } else for (const child of readdirSync(path))
-            this.load(join(path, child), log);
+            this.load(join(path, child), verbose);
     }
 }

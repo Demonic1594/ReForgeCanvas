@@ -5,6 +5,7 @@
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const forgescript_1 = require("@tryforge/forgescript");
+const __1 = require("../..");
 exports.default = new forgescript_1.NativeFunction({
     name: '$resizeCanvas',
     aliases: ['$canvasResize'],
@@ -39,6 +40,12 @@ exports.default = new forgescript_1.NativeFunction({
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
             return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+        try {
+            (0, __1.checkCanvasSize)(w, h, (0, __1.policyOf)(ctx.client));
+        }
+        catch (e) {
+            return (0, __1.loaderFailure)(this, e, "This canvas is too large" /* ForgeCanvasError.CanvasTooLarge */, "This canvas is too large" /* ForgeCanvasError.CanvasTooLarge */);
+        }
         canvas.resize(w, h);
         return this.success();
     }

@@ -69,6 +69,6 @@ export declare class LottieManager extends Manager<LottieAnimation> {
 }
 export declare class ComponentManager extends Manager<ForgeFunction> {
     set(component: ForgeFunction | IForgeFunction): void;
-    load(path: string, log?: boolean): void;
+    load(path: string, verbose?: boolean): void;
 }
 export {};

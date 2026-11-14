@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
 import { DisposalMethod } from '@gifsx/gifsx';
 
-import { ForgeCanvasError, resolveFrame } from '../..';
+import { ForgeCanvasError, countGifFrame, loaderFailure, policyOf, resolveFrame } from '../..';
 
 export default new NativeFunction({
     name: '$addFrame',
@@ -77,6 +77,7 @@ export default new NativeFunction({
                 f.setPalette(Uint8Array.from(options.palette));
         }
 
+        try { countGifFrame(gif, f.width * f.height, policyOf(ctx.client)) } catch (e) { return loaderFailure(this, e, ForgeCanvasError.GIFTooLarge, ForgeCanvasError.GIFTooLarge) }
         gif.addFrame(f);
         return this.success();
     }

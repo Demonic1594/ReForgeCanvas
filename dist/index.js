@@ -44,32 +44,44 @@ exports.ReForgeCanvas = exports.version = void 0;
 const forgescript_1 = require("@tryforge/forgescript");
 const classes_1 = require("./classes");
 const loader_1 = require("./structures/loader");
+const logger_1 = require("./structures/logger");
 const pkg = __importStar(require("../package.json"));
 exports.version = pkg.version;
 /** The name the original ForgeCanvas registers; both define the same functions. */
 const UPSTREAM_NAME = 'forge.canvas';
+/** One-time warnings about guarded working-folder access (files.read / files.write: true). */
+let warnedGuarded = false;
 class ReForgeCanvas extends forgescript_1.ForgeExtension {
     name = 'reforge.canvas';
     description = pkg.description;
     version = exports.version;
     /** The resolved loader policy of this bot (defaults filled in). */
     policy;
+    /** Wrong options throw here, so the bot does not start with a broken setup. */
     constructor(options = {}) {
         super();
         this.policy = (0, loader_1.resolvePolicy)(options);
+        (0, logger_1.setLogLevel)(this.policy.logLevel);
+    }
+    /**
+     * Runs before init(), outside ForgeScript's try/catch, so an error here stops the client:
+     * ForgeCanvas next to ReForgeCanvas is refused (both define the same functions).
+     */
+    validateAndInit(client) {
+        if (client.options.extensions?.some(x => x !== this && x?.name === UPSTREAM_NAME))
+            throw new Error(`${logger_1.LOG_PREFIX} ForgeCanvas (@tryforge/forge.canvas) cannot be loaded next to ReForgeCanvas: both define the same functions, and whichever loads last replaces the other. Remove ForgeCanvas from the extensions (and npm uninstall @tryforge/forge.canvas).`);
+        super.validateAndInit(client);
     }
     init(client) {
-        const upstream = client.options.extensions?.filter(x => x !== this && x?.name === UPSTREAM_NAME) ?? [];
-        if (upstream.length) {
-            forgescript_1.Logger.error(`${loader_1.LOG_PREFIX} ForgeCanvas (@tryforge/forge.canvas) is loaded next to ReForgeCanvas. Both define the same functions; ` +
-                'ReForgeCanvas keeps its own and ForgeCanvas is not started. Remove @tryforge/forge.canvas from the extensions.');
-            // Extensions listed after this one have not started yet: keep them from replacing the hardened functions.
-            for (const ext of upstream)
-                ext.init = () => { };
+        const f = this.policy.files;
+        if ((f.readGuarded || f.writeGuarded) && !warnedGuarded) {
+            warnedGuarded = true;
+            logger_1.log.warn(`files.${f.readGuarded ? 'read' : 'write'}: true lets commands use the whole bot folder (${process.cwd()}), with guards: only image, font, GIF and Lottie files, no hidden files, node_modules or databases. A folder of its own is safer: files: { read: "./assets", write: "./output" }.`);
         }
         (0, loader_1.setPolicy)(client, this.policy);
         this.load(__dirname + '/functions');
         client.preloadImages = new classes_1.ImageManager(this.policy);
+        logger_1.log.debug(`started: network ${this.policy.network.enabled ? 'on' : 'off'}, files.read ${f.read ?? 'off'}, files.write ${f.write ?? 'off'}`);
     }
     static components = new classes_1.ComponentManager();
 }

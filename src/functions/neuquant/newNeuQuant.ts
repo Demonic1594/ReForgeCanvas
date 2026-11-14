@@ -6,7 +6,7 @@
 import { ArgType, NativeFunction } from '@tryforge/forgescript';
 import { NeuQuant } from '@gifsx/gifsx';
 
-import { NeuQuantManager } from '../..';
+import { NeuQuantManager, neuQuantProblem } from '../..';
 
 export default new NativeFunction({
     name: '$newNeuQuant',
@@ -46,6 +46,9 @@ export default new NativeFunction({
         }
     ],
     execute (ctx, [name, sample, maxColors, pixels]) {
+        const problem = neuQuantProblem(sample, maxColors);
+        if (problem) return this.customError(problem);
+
         if (!ctx.neuquantManager || !(ctx.neuquantManager instanceof NeuQuantManager))
             ctx.neuquantManager = new NeuQuantManager();
 

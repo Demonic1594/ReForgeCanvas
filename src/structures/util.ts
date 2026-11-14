@@ -12,9 +12,11 @@ import { promises as fsp } from 'node:fs';
 
 import { ForgeCanvasError, CanvasBuilder, Spans, ImageFormat, ImageManager } from '..';
 import {
-    LoaderError, LoaderPolicy, LOG_PREFIX, OWNER_POLICY, DEFAULT_POLICY, ImageSource,
+    LoaderError, LoaderPolicy, OWNER_POLICY, DEFAULT_POLICY, ImageSource,
     describeUrl, fetchBytes, loadImageFrom, policyOf, readLocal, resolveReadPath, sourceKind
 } from './loader';
+import { log as clog } from './logger';
+import { indexedProblem } from './native';
 
 export const urlRegex = /^url\(['"]?|['"]?\)$/g;
 export const fontcssRegex = /\/\*\s*(?<subset>[\w-]+)\s*\*\/[\s\S]*?font-family:\s*['"]?(?<family>[^'";]+)['"]?;[\s\S]*?url\((?<url>[^)]+)\)/g;
@@ -86,8 +88,8 @@ async function registerFontList(
                 state.files--; // the stylesheet itself is not a font file
                 await registerFontList(families, log, policy, depth + 1, state, url);
             } else if (!GlobalFonts.register(data, font.name ?? undefined)) {
-                if (log) Logger.warn(`${LOG_PREFIX} Failed to register font: '${font.name ?? describeUrl(src)}'`);
-            } else if (log) Logger.info(`${LOG_PREFIX} Registered a font: ${font.name ?? describeUrl(src)}`);
+                if (log) clog.print(`Failed to register font: '${font.name ?? describeUrl(src)}'`);
+            } else if (log) clog.print(`Registered a font: ${font.name ?? describeUrl(src)}`);
             continue;
         }
 
@@ -103,8 +105,11 @@ async function registerFontList(
         }
 
         if (entry.folder) {
-            const children = await fsp.readdir(entry.path);
-            await registerFontList(children.map(x => ({ src: join(entry.path, x) })), log, policy, depth + 1, state, null);
+            // a folder: its fonts and subfolders; hidden files and node_modules are never walked into
+            const children = (await fsp.readdir(entry.path, { withFileTypes: true }))
+                .filter(d => !d.name.startsWith('.') && d.name !== 'node_modules'
+                    && (d.isDirectory() || SUPPORTED_FONT_FORMATS.includes(d.name.split('.').pop()!.toLowerCase())));
+            await registerFontList(children.map(d => ({ src: join(entry.path, d.name) })), log, policy, depth + 1, state, null);
             continue;
         }
 
@@ -113,7 +118,7 @@ async function registerFontList(
 
         filename = font.name ?? filename.slice(0, filename.lastIndexOf('.'));
         if (log && GlobalFonts.has(filename))
-            Logger.warn(`${LOG_PREFIX} Font with name '${filename}' already exists`);
+            clog.warn(`Font with name '${filename}' already exists`);
 
         if (!filename?.length)
             throw new Error(`Font name cannot be empty: ${src}`);
@@ -122,10 +127,10 @@ async function registerFontList(
 
         countFont(policy, state, src);
         if (!GlobalFonts.register(await readLocal(entry.path, policy), filename)) {
-            if (log) Logger.warn(`${LOG_PREFIX} Failed to register font: ${filename} (${src})`);
+            if (log) clog.print(`Failed to register font: ${filename} (${src})`);
             continue;
         }
-        if (log) Logger.info(`${LOG_PREFIX} Registered a font: ${filename} (${src})`);
+        if (log) clog.print(`Registered a font: ${filename} (${src})`);
     }
 }
 
@@ -140,13 +145,13 @@ export function imageManagerOf(ctx: Context) {
  * Logs why a load failed (with the detail) and returns a generic error for the user.
  * Refusals say only that the source is not allowed or too large; never the address, path or library text.
  */
-export function loaderFailure(self: CompiledFunction, err: unknown, generic: ForgeCanvasError | string = ForgeCanvasError.ImageFail) {
+export function loaderFailure(self: CompiledFunction, err: unknown, generic: ForgeCanvasError | string = ForgeCanvasError.ImageFail, tooLarge: ForgeCanvasError | string = ForgeCanvasError.SourceTooLarge) {
     const code = err instanceof LoaderError ? err.code : 'FAILED';
     const detail = err instanceof Error ? err.message : String(err);
-    Logger.warn(`${LOG_PREFIX} ${self?.data?.name ?? 'load'}: ${code} ${detail}`);
+    clog.warn(`${self?.data?.name ?? 'load'}: ${code} ${detail}`);
     return self.customError(
         code === 'NOT_ALLOWED' ? ForgeCanvasError.SourceNotAllowed
-            : code === 'TOO_LARGE' ? ForgeCanvasError.SourceTooLarge
+            : code === 'TOO_LARGE' ? tooLarge
                 : generic
     );
 }
@@ -293,18 +298,17 @@ export async function resolveImage(self: CompiledFunction, ctx: Context, src: st
             if (!frame) return self.customError(ForgeCanvasError.NoFrame);
 
             const { width, height, buffer } = frame;
+            const rgba = buffer.length === width * height * 4;
+            const palette = rgba ? null : new Uint8Array(frame.palette ?? []);
+            const problem = rgba ? null : indexedProblem(buffer, palette);
+            if (problem) return self.customError(problem);
 
             const canvas = createCanvas(width, height);
             const context = canvas.getContext('2d');
             const imageData = context.createImageData(width, height);
 
             imageData.data.set(
-                buffer.length === width * height * 4
-                    ? buffer : indexedToRgba(
-                        Uint8Array.from(buffer),
-                        new Uint8Array(frame.palette ?? []),
-                        frame.transparent
-                    )
+                rgba ? buffer : indexedToRgba(Uint8Array.from(buffer), palette!, frame.transparent)
             );
             context.putImageData(imageData, 0, 0);
 
@@ -435,6 +439,9 @@ export async function parseText(client: ForgeClient, text: string, parseNL?: boo
 
     let sI = 0;
     let i = 0;
+    // each emoji is an image fetched from Discord's CDN: beyond limits.maxEmojisPerText they stay text
+    let emojis = 0;
+    const maxEmojis = policyOf(client).limits.maxEmojisPerText;
     while (i < text.length) {
         const c = text[i];
 
@@ -454,7 +461,7 @@ export async function parseText(client: ForgeClient, text: string, parseNL?: boo
             i++;
             sI = i;
             continue;
-        } else if (parseEmoji && c === '<') {
+        } else if (parseEmoji && c === '<' && emojis < maxEmojis) {
             regex.lastIndex = i;
             const match = regex.exec(text);
 
@@ -464,6 +471,7 @@ export async function parseText(client: ForgeClient, text: string, parseNL?: boo
 
                 if (cur.length) spans.push(cur);
 
+                emojis++;
                 spans.push(client.preloadImages.tryGet(
                     `cache_emoji_${id}`,
                     `https://cdn.discordapp.com/emojis/${id}.png`,

@@ -69,6 +69,12 @@ exports.default = new forgescript_1.NativeFunction({
             if (Array.isArray(options.palette))
                 f.setPalette(Uint8Array.from(options.palette));
         }
+        try {
+            (0, __1.countGifFrame)(gif, f.width * f.height, (0, __1.policyOf)(ctx.client));
+        }
+        catch (e) {
+            return (0, __1.loaderFailure)(this, e, "This GIF is too large" /* ForgeCanvasError.GIFTooLarge */, "This GIF is too large" /* ForgeCanvasError.GIFTooLarge */);
+        }
         gif.addFrame(f);
         return this.success();
     }

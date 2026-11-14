@@ -44,7 +44,9 @@ export default new NativeFunction({
             }
 
             image = manager?.get(path);
-        } else try {
+        } else if (path.startsWith('preload://'))
+            image = ctx.client.preloadImages.get(path.slice(10));
+        else try {
             image = await imageManagerOf(ctx).load(path);
         } catch (e) { return loaderFailure(this, e) }
         if (!image) return this.customError(ForgeCanvasError.NoImage);

@@ -6,7 +6,7 @@
 import { ArgType, NativeFunction } from '@tryforge/forgescript';
 import { Decoder } from '@gifsx/gifsx';
 
-import { ForgeCanvasError, GIFManager, loaderFailure, loadSource, policyOf } from '../..';
+import { ForgeCanvasError, GIFManager, LoaderError, imageDimensions, loaderFailure, loadSource, policyOf } from '../..';
 
 export default new NativeFunction({
     name: '$newGIFDecoder',
@@ -55,6 +55,10 @@ export default new NativeFunction({
         } catch (e) { return loaderFailure(this, e, ForgeCanvasError.GIFFail) }
 
         try {
+            const size = imageDimensions(Buffer.from(gif.buffer, gif.byteOffset, gif.byteLength));
+            const max = policyOf(ctx.client).limits.maxImagePixels;
+            if (size && size.width * size.height > max)
+                throw new LoaderError('TOO_LARGE', `the GIF is ${size.width}x${size.height}, over limits.maxImagePixels ${max}`);
             manager.setDecoder(
                 name,
                 new Decoder(

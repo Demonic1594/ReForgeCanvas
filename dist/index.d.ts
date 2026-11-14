@@ -8,7 +8,13 @@ export declare class ReForgeCanvas extends ForgeExtension {
     version: string;
     /** The resolved loader policy of this bot (defaults filled in). */
     readonly policy: LoaderPolicy;
+    /** Wrong options throw here, so the bot does not start with a broken setup. */
     constructor(options?: IReForgeCanvasOptions);
+    /**
+     * Runs before init(), outside ForgeScript's try/catch, so an error here stops the client:
+     * ForgeCanvas next to ReForgeCanvas is refused (both define the same functions).
+     */
+    protected validateAndInit(client: ForgeClient): void;
     init(client: ForgeClient): void;
     static components: ComponentManager;
 }

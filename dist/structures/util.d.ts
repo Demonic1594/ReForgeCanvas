@@ -30,7 +30,7 @@ export declare function imageManagerOf(ctx: Context): ImageManager;
  * Logs why a load failed (with the detail) and returns a generic error for the user.
  * Refusals say only that the source is not allowed or too large; never the address, path or library text.
  */
-export declare function loaderFailure(self: CompiledFunction, err: unknown, generic?: ForgeCanvasError | string): import("@tryforge/forgescript").Return<import("@tryforge/forgescript").ReturnType.Error>;
+export declare function loaderFailure(self: CompiledFunction, err: unknown, generic?: ForgeCanvasError | string, tooLarge?: ForgeCanvasError | string): import("@tryforge/forgescript").Return<import("@tryforge/forgescript").ReturnType.Error>;
 /** True when a $drawImage source is meant as a style (colour, gradient://, pattern://) rather than an image. */
 export declare function isStyleSource(src: string): boolean;
 export declare function validateFont(font: string): string | RegExpExecArray;

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ForgeCanvasError, checkCanvasSize, loaderFailure, policyOf } from '../..';
 
 export default new NativeFunction({
     name: '$resizeCanvas',
@@ -40,6 +40,7 @@ export default new NativeFunction({
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
 
+        try { checkCanvasSize(w, h, policyOf(ctx.client)) } catch (e) { return loaderFailure(this, e, ForgeCanvasError.CanvasTooLarge, ForgeCanvasError.CanvasTooLarge) }
         canvas.resize(w,h);
         return this.success();
     }

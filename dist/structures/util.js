@@ -18,13 +18,14 @@ exports.resolveFrame = resolveFrame;
 exports.parseText = parseText;
 exports.loadFrame = loadFrame;
 exports.parseArgs = parseArgs;
-const forgescript_1 = require("@tryforge/forgescript");
 const canvas_1 = require("@napi-rs/canvas");
 const gifsx_1 = require("@gifsx/gifsx");
 const node_path_1 = require("node:path");
 const node_fs_1 = require("node:fs");
 const __1 = require("..");
 const loader_1 = require("./loader");
+const logger_1 = require("./logger");
+const native_1 = require("./native");
 exports.urlRegex = /^url\(['"]?|['"]?\)$/g;
 exports.fontcssRegex = /\/\*\s*(?<subset>[\w-]+)\s*\*\/[\s\S]*?font-family:\s*['"]?(?<family>[^'";]+)['"]?;[\s\S]*?url\((?<url>[^)]+)\)/g;
 exports.emojiRegex = /<(a?):(\w+):(\d+)>/y;
@@ -82,10 +83,10 @@ async function registerFontList(fonts, log, policy, depth, state, base) {
             }
             else if (!canvas_1.GlobalFonts.register(data, font.name ?? undefined)) {
                 if (log)
-                    forgescript_1.Logger.warn(`${loader_1.LOG_PREFIX} Failed to register font: '${font.name ?? (0, loader_1.describeUrl)(src)}'`);
+                    logger_1.log.print(`Failed to register font: '${font.name ?? (0, loader_1.describeUrl)(src)}'`);
             }
             else if (log)
-                forgescript_1.Logger.info(`${loader_1.LOG_PREFIX} Registered a font: ${font.name ?? (0, loader_1.describeUrl)(src)}`);
+                logger_1.log.print(`Registered a font: ${font.name ?? (0, loader_1.describeUrl)(src)}`);
             continue;
         }
         if ((0, loader_1.sourceKind)(src) !== 'path')
@@ -103,8 +104,11 @@ async function registerFontList(fonts, log, policy, depth, state, base) {
             throw e;
         }
         if (entry.folder) {
-            const children = await node_fs_1.promises.readdir(entry.path);
-            await registerFontList(children.map(x => ({ src: (0, node_path_1.join)(entry.path, x) })), log, policy, depth + 1, state, null);
+            // a folder: its fonts and subfolders; hidden files and node_modules are never walked into
+            const children = (await node_fs_1.promises.readdir(entry.path, { withFileTypes: true }))
+                .filter(d => !d.name.startsWith('.') && d.name !== 'node_modules'
+                && (d.isDirectory() || exports.SUPPORTED_FONT_FORMATS.includes(d.name.split('.').pop().toLowerCase())));
+            await registerFontList(children.map(d => ({ src: (0, node_path_1.join)(entry.path, d.name) })), log, policy, depth + 1, state, null);
             continue;
         }
         let filename = (0, node_path_1.basename)(entry.path);
@@ -112,7 +116,7 @@ async function registerFontList(fonts, log, policy, depth, state, base) {
             continue;
         filename = font.name ?? filename.slice(0, filename.lastIndexOf('.'));
         if (log && canvas_1.GlobalFonts.has(filename))
-            forgescript_1.Logger.warn(`${loader_1.LOG_PREFIX} Font with name '${filename}' already exists`);
+            logger_1.log.warn(`Font with name '${filename}' already exists`);
         if (!filename?.length)
             throw new Error(`Font name cannot be empty: ${src}`);
         if (filename.includes(','))
@@ -120,11 +124,11 @@ async function registerFontList(fonts, log, policy, depth, state, base) {
         countFont(policy, state, src);
         if (!canvas_1.GlobalFonts.register(await (0, loader_1.readLocal)(entry.path, policy), filename)) {
             if (log)
-                forgescript_1.Logger.warn(`${loader_1.LOG_PREFIX} Failed to register font: ${filename} (${src})`);
+                logger_1.log.print(`Failed to register font: ${filename} (${src})`);
             continue;
         }
         if (log)
-            forgescript_1.Logger.info(`${loader_1.LOG_PREFIX} Registered a font: ${filename} (${src})`);
+            logger_1.log.print(`Registered a font: ${filename} (${src})`);
     }
 }
 /** The ImageManager of this run, created with the bot's policy when missing. */
@@ -137,12 +141,12 @@ function imageManagerOf(ctx) {
  * Logs why a load failed (with the detail) and returns a generic error for the user.
  * Refusals say only that the source is not allowed or too large; never the address, path or library text.
  */
-function loaderFailure(self, err, generic = "Failed to load an image" /* ForgeCanvasError.ImageFail */) {
+function loaderFailure(self, err, generic = "Failed to load an image" /* ForgeCanvasError.ImageFail */, tooLarge = "This source is too large" /* ForgeCanvasError.SourceTooLarge */) {
     const code = err instanceof loader_1.LoaderError ? err.code : 'FAILED';
     const detail = err instanceof Error ? err.message : String(err);
-    forgescript_1.Logger.warn(`${loader_1.LOG_PREFIX} ${self?.data?.name ?? 'load'}: ${code} ${detail}`);
+    logger_1.log.warn(`${self?.data?.name ?? 'load'}: ${code} ${detail}`);
     return self.customError(code === 'NOT_ALLOWED' ? "This source is not allowed" /* ForgeCanvasError.SourceNotAllowed */
-        : code === 'TOO_LARGE' ? "This source is too large" /* ForgeCanvasError.SourceTooLarge */
+        : code === 'TOO_LARGE' ? tooLarge
             : generic);
 }
 /** True when a $drawImage source is meant as a style (colour, gradient://, pattern://) rather than an image. */
@@ -267,11 +271,15 @@ async function resolveImage(self, ctx, src) {
             if (!frame)
                 return self.customError("No frame with provided name found" /* ForgeCanvasError.NoFrame */);
             const { width, height, buffer } = frame;
+            const rgba = buffer.length === width * height * 4;
+            const palette = rgba ? null : new Uint8Array(frame.palette ?? []);
+            const problem = rgba ? null : (0, native_1.indexedProblem)(buffer, palette);
+            if (problem)
+                return self.customError(problem);
             const canvas = (0, canvas_1.createCanvas)(width, height);
             const context = canvas.getContext('2d');
             const imageData = context.createImageData(width, height);
-            imageData.data.set(buffer.length === width * height * 4
-                ? buffer : (0, gifsx_1.indexedToRgba)(Uint8Array.from(buffer), new Uint8Array(frame.palette ?? []), frame.transparent));
+            imageData.data.set(rgba ? buffer : (0, gifsx_1.indexedToRgba)(Uint8Array.from(buffer), palette, frame.transparent));
             context.putImageData(imageData, 0, 0);
             img = await canvas.encode('png');
             break;
@@ -373,6 +381,9 @@ async function parseText(client, text, parseNL, parseEmoji) {
     let cur = '';
     let sI = 0;
     let i = 0;
+    // each emoji is an image fetched from Discord's CDN: beyond limits.maxEmojisPerText they stay text
+    let emojis = 0;
+    const maxEmojis = (0, loader_1.policyOf)(client).limits.maxEmojisPerText;
     while (i < text.length) {
         const c = text[i];
         if (c === '\\') {
@@ -392,7 +403,7 @@ async function parseText(client, text, parseNL, parseEmoji) {
             sI = i;
             continue;
         }
-        else if (parseEmoji && c === '<') {
+        else if (parseEmoji && c === '<' && emojis < maxEmojis) {
             regex.lastIndex = i;
             const match = regex.exec(text);
             if (match) {
@@ -400,6 +411,7 @@ async function parseText(client, text, parseNL, parseEmoji) {
                 const id = match[3];
                 if (cur.length)
                     spans.push(cur);
+                emojis++;
                 spans.push(client.preloadImages.tryGet(`cache_emoji_${id}`, `https://cdn.discordapp.com/emojis/${id}.png`, { extraHosts: exports.EMOJI_HOSTS }));
                 cur = '';
                 i += match[0].length;

@@ -7,7 +7,7 @@
     "build": "tsc",
     "docgen": "node dist/docgen",
     "license": "node dist/@build/license.js",
-    "test": "node --test --test-reporter=spec \"test/*.test.js\"",
+    "test": "node --expose-gc --test --test-reporter=spec \"test/*.test.js\"",
     "lint": "tsc --noEmit && node scripts/lint.js",
     "prepublish": "tsc && npm run license && typedoc src/index.ts && node dist/docgen",
     "bot": "swc src -d dist --strip-leading-paths && node --env-file=.env dist/__tests__/index.js"
@@ -42,6 +42,7 @@
     "@swc/cli": "^0.8.1",
     "@tryforge/forgescript": "^2.7.1",
     "@types/node": "^22.20.4",
+    "ipaddr.js": "^2.5.0",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3"
   },
@@ -60,6 +61,6 @@
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=18.17"
   }
 }

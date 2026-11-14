@@ -5,6 +5,7 @@
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { indexedToHex } from '@gifsx/gifsx';
+import { indexedProblem } from '../..';
 
 export default new NativeFunction({
     name: '$indexedToHex',
@@ -51,12 +52,15 @@ export default new NativeFunction({
         }
     ],
     execute (_, [palette, transparent, aua, a_s, pixels]) {
+        const px = Uint8Array.from(pixels);
+        const pal = Array.isArray(palette) ? Uint8Array.from(palette as number[]) : null;
+        const problem = indexedProblem(px, pal);
+        if (problem) return this.customError(problem);
         try {
             const res = indexedToHex(
-                Uint8Array.from(pixels),
-                Uint8Array.from(palette as unknown as number[]),
-                transparent, aua ?? false,
-                a_s ?? false
+                px, pal!,
+                typeof transparent === 'number' && !Number.isNaN(transparent) ? transparent : undefined, aua === true,
+                a_s === true
             );
             return this.success(`[${res.map(x => `"${x}"`).join(', ')}]`);
         } catch(e) {

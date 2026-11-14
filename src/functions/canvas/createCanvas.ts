@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { CanvasManager, CanvasBuilder, ForgeCanvasError } from '../..';
+import { CanvasManager, CanvasBuilder, ForgeCanvasError, checkCanvasSize, loaderFailure, policyOf } from '../..';
 
 export default new NativeFunction({
     name: '$createCanvas',
@@ -54,6 +54,8 @@ export default new NativeFunction({
 
         if (!name?.trim()?.length)
             return this.customError(ForgeCanvasError.EmptyName);
+
+        try { checkCanvasSize(w, h, policyOf(ctx.client)) } catch (e) { return loaderFailure(this, e, ForgeCanvasError.CanvasTooLarge, ForgeCanvasError.CanvasTooLarge) }
 
         const previous = manager.current;
         manager.current = new CanvasBuilder(w,h);

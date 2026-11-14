@@ -66,6 +66,12 @@ exports.default = new forgescript_1.NativeFunction({
         }
         catch (_) { }
         ;
+        try {
+            (0, __1.checkCanvasSize)(width, height, (0, __1.policyOf)(ctx.client), 'GIF');
+        }
+        catch (e) {
+            return (0, __1.loaderFailure)(this, e, "This GIF is too large" /* ForgeCanvasError.GIFTooLarge */, "This GIF is too large" /* ForgeCanvasError.GIFTooLarge */);
+        }
         const previous = manager.currentEncoder;
         manager.currentEncoder = new gifsx_1.Encoder(width, height, Array.isArray(palette)
             ? Uint8Array.from(palette)

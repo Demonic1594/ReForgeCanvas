@@ -45,6 +45,9 @@ exports.default = new forgescript_1.NativeFunction({
         }
     ],
     execute(ctx, [name, sample, maxColors, pixels]) {
+        const problem = (0, __1.neuQuantProblem)(sample, maxColors);
+        if (problem)
+            return this.customError(problem);
         if (!ctx.neuquantManager || !(ctx.neuquantManager instanceof __1.NeuQuantManager))
             ctx.neuquantManager = new __1.NeuQuantManager();
         ctx.neuquantManager.set(name, new gifsx_1.NeuQuant(sample, maxColors, Uint8Array.from(pixels)));

@@ -40,6 +40,8 @@ exports.default = new forgescript_1.NativeFunction({
             }
             image = manager?.get(path);
         }
+        else if (path.startsWith('preload://'))
+            image = ctx.client.preloadImages.get(path.slice(10));
         else
             try {
                 image = await (0, __1.imageManagerOf)(ctx).load(path);

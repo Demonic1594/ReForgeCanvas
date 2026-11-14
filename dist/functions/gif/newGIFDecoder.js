@@ -58,6 +58,10 @@ exports.default = new forgescript_1.NativeFunction({
                 return (0, __1.loaderFailure)(this, e, "Failed to load the GIF" /* ForgeCanvasError.GIFFail */);
             }
         try {
+            const size = (0, __1.imageDimensions)(Buffer.from(gif.buffer, gif.byteOffset, gif.byteLength));
+            const max = (0, __1.policyOf)(ctx.client).limits.maxImagePixels;
+            if (size && size.width * size.height > max)
+                throw new __1.LoaderError('TOO_LARGE', `the GIF is ${size.width}x${size.height}, over limits.maxImagePixels ${max}`);
             manager.setDecoder(name, new gifsx_1.Decoder(new Uint8Array(gif), options ? manager.getDecodeOptions(options) : undefined));
         }
         catch (e) {

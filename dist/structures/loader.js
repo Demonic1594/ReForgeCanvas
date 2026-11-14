@@ -37,7 +37,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OWNER_POLICY = exports.DEFAULT_POLICY = exports.LOG_PREFIX = exports.LoaderError = void 0;
+exports.OWNER_POLICY = exports.DEFAULT_POLICY = exports.LoaderError = exports.LOG_LEVELS = exports.LOG_PREFIX = void 0;
 exports.resolvePolicy = resolvePolicy;
 exports.setPolicy = setPolicy;
 exports.policyOf = policyOf;
@@ -46,6 +46,7 @@ exports.addressRefused = addressRefused;
 exports.hostAllowed = hostAllowed;
 exports.describeUrl = describeUrl;
 exports.fetchBytes = fetchBytes;
+exports.describePath = describePath;
 exports.resolveReadPath = resolveReadPath;
 exports.assertReadablePath = assertReadablePath;
 exports.readLocal = readLocal;
@@ -53,6 +54,10 @@ exports.writeLocal = writeLocal;
 exports.sourceKind = sourceKind;
 exports.loadSource = loadSource;
 exports.loadImageFrom = loadImageFrom;
+exports.dataUrlBytes = dataUrlBytes;
+exports.imageDimensions = imageDimensions;
+exports.checkCanvasSize = checkCanvasSize;
+exports.countGifFrame = countGifFrame;
 // ReForgeCanvas: the shared loader every image, font, GIF and Lottie source goes through.
 const node_net_1 = require("node:net");
 const dns = __importStar(require("node:dns"));
@@ -61,6 +66,10 @@ const node_https_1 = require("node:https");
 const node_fs_1 = require("node:fs");
 const node_path_1 = require("node:path");
 const canvas_1 = require("@napi-rs/canvas");
+const logger_1 = require("./logger");
+var logger_2 = require("./logger");
+Object.defineProperty(exports, "LOG_PREFIX", { enumerable: true, get: function () { return logger_2.LOG_PREFIX; } });
+Object.defineProperty(exports, "LOG_LEVELS", { enumerable: true, get: function () { return logger_2.LOG_LEVELS; } });
 /** A refused or failed load. `message` is for the log; users get a generic text. */
 class LoaderError extends Error {
     code;
@@ -71,34 +80,67 @@ class LoaderError extends Error {
     }
 }
 exports.LoaderError = LoaderError;
-exports.LOG_PREFIX = '[ReForgeCanvas]';
-function nonNegative(value, fallback) {
-    return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : fallback;
+function optionError(message) {
+    throw new TypeError(`${logger_1.LOG_PREFIX} ${message}`);
 }
+function num(value, fallback, key, min = 0) {
+    if (value === undefined || value === null)
+        return fallback;
+    if (typeof value !== 'number' || Number.isNaN(value) || value < min)
+        optionError(`${key} must be a number of at least ${min} (Infinity for no limit), got ${JSON.stringify(value)}`);
+    return value;
+}
+function folder(value, key) {
+    if (value === undefined || value === null || value === false)
+        return { dir: null, guarded: false };
+    if (value === true)
+        return { dir: process.cwd(), guarded: true };
+    if (typeof value === 'string' && value.trim().length)
+        return { dir: (0, node_path_1.resolve)(value), guarded: false };
+    return optionError(`${key} must be a folder path, true (the working folder, guarded) or null, got ${JSON.stringify(value)}`);
+}
+/** Checks the options and fills in the defaults; a wrong option throws here, in the extension's constructor. */
 function resolvePolicy(options = {}) {
+    if (options === null || typeof options !== 'object')
+        optionError('options must be an object');
     const n = options.network ?? {};
     const f = options.files ?? {};
+    const l = options.limits ?? {};
+    if (options.logLevel !== undefined && !logger_1.LOG_LEVELS.includes(options.logLevel))
+        optionError(`logLevel must be one of ${logger_1.LOG_LEVELS.join(', ')}, got ${JSON.stringify(options.logLevel)}`);
+    if (n.allowedHosts !== undefined && !(Array.isArray(n.allowedHosts) && n.allowedHosts.every(h => typeof h === 'string')))
+        optionError('network.allowedHosts must be a list of host names');
+    if (n.allowPrivateNetwork !== undefined && typeof n.allowPrivateNetwork !== 'boolean'
+        && !(Array.isArray(n.allowPrivateNetwork) && n.allowPrivateNetwork.every(a => typeof a === 'string' && (0, node_net_1.isIP)(normaliseHost(a)))))
+        optionError('network.allowPrivateNetwork must be true, false or a list of IP addresses');
+    const read = folder(f.read, 'files.read');
+    const write = folder(f.write, 'files.write');
     const hosts = (n.allowedHosts ?? []).map(normaliseHost).filter(Boolean);
     return Object.freeze({
+        logLevel: options.logLevel ?? (0, logger_1.envLogLevel)() ?? 'warn',
         network: Object.freeze({
             enabled: n.enabled ?? true,
-            timeout: nonNegative(n.timeout, 10_000) || 10_000,
-            maxBytes: nonNegative(n.maxBytes, 10 * 1024 * 1024),
-            maxRedirects: Math.floor(nonNegative(n.maxRedirects, 5)),
+            timeout: num(n.timeout, 10_000, 'network.timeout', 1),
+            maxBytes: num(n.maxBytes, 10 * 1024 * 1024, 'network.maxBytes'),
+            maxRedirects: Math.floor(num(n.maxRedirects, 5, 'network.maxRedirects')),
             allowedHosts: Object.freeze(hosts),
             allowPrivateNetwork: n.allowPrivateNetwork === true,
             privateAddresses: Object.freeze(Array.isArray(n.allowPrivateNetwork)
                 ? n.allowPrivateNetwork.map(normaliseHost).filter(x => (0, node_net_1.isIP)(x)) : [])
         }),
-        files: Object.freeze({
-            read: typeof f.read === 'string' && f.read.length ? (0, node_path_1.resolve)(f.read) : null,
-            write: typeof f.write === 'string' && f.write.length ? (0, node_path_1.resolve)(f.write) : null
-        }),
+        files: Object.freeze({ read: read.dir, write: write.dir, readGuarded: read.guarded, writeGuarded: write.guarded }),
         fonts: Object.freeze({
-            maxDepth: Math.floor(nonNegative(options.fonts?.maxDepth, 3)),
-            maxFiles: Math.floor(nonNegative(options.fonts?.maxFiles, 100))
+            maxDepth: Math.floor(num(options.fonts?.maxDepth, 3, 'fonts.maxDepth')),
+            maxFiles: Math.floor(num(options.fonts?.maxFiles, 100, 'fonts.maxFiles'))
         }),
-        cache: Object.freeze({ maxImages: Math.floor(nonNegative(options.cache?.maxImages, 500)) })
+        cache: Object.freeze({ maxImages: Math.floor(num(options.cache?.maxImages, 500, 'cache.maxImages')) }),
+        limits: Object.freeze({
+            maxCanvasPixels: num(l.maxCanvasPixels, 25_000_000, 'limits.maxCanvasPixels', 1),
+            maxImagePixels: num(l.maxImagePixels, 25_000_000, 'limits.maxImagePixels', 1),
+            maxGifFrames: num(l.maxGifFrames, 300, 'limits.maxGifFrames', 1),
+            maxGifPixels: num(l.maxGifPixels, 100_000_000, 'limits.maxGifPixels', 1),
+            maxEmojisPerText: Math.floor(num(l.maxEmojisPerText, 50, 'limits.maxEmojisPerText'))
+        })
     });
 }
 /** The policy used when no bot is known (managers created outside a command). */
@@ -122,7 +164,7 @@ for (const [net, prefix] of [
 ])
     blocked.addSubnet(net, prefix, 'ipv4');
 for (const [net, prefix] of [
-    ['::', 128], ['::1', 128], ['100::', 64], ['2001::', 23], ['2001:db8::', 32],
+    ['::', 128], ['::1', 128], ['64:ff9b:1::', 48], ['100::', 64], ['2001::', 23], ['2001:db8::', 32],
     ['fc00::', 7], ['fe80::', 10], ['fec0::', 10], ['ff00::', 8]
 ])
     blocked.addSubnet(net, prefix, 'ipv6');
@@ -226,6 +268,10 @@ function checkUrl(url, policy, extraHosts) {
         throw new LoaderError('NOT_ALLOWED', `host ${host} is not in network.allowedHosts`);
     if ((0, node_net_1.isIP)(host) && addressRefused(host, policy))
         throw new LoaderError('NOT_ALLOWED', `${host} is a non-public address`);
+    // RFC 6761: localhost and *.localhost always mean this machine, whatever DNS says
+    if ((host === 'localhost' || host.endsWith('.localhost')) && !policy.network.allowPrivateNetwork
+        && !policy.network.privateAddresses.some(x => x === '127.0.0.1' || x === '::1'))
+        throw new LoaderError('NOT_ALLOWED', `${host} is this machine`);
 }
 function cleanHeaders(headers) {
     const out = {};
@@ -240,7 +286,7 @@ function cleanHeaders(headers) {
 }
 /** Fetches a URL under the policy: allowlist, address checks on every hop, redirect cap, timeout, size cap. */
 function fetchBytes(input, policy, options = {}) {
-    const limit = Math.min(policy.network.maxRedirects, nonNegative(options.maxRedirects, Infinity));
+    const limit = Math.min(policy.network.maxRedirects, typeof options.maxRedirects === 'number' && options.maxRedirects >= 0 ? options.maxRedirects : Infinity);
     const maxBytes = policy.network.maxBytes;
     const headers = cleanHeaders(options.headers);
     return new Promise((resolve, reject) => {
@@ -258,6 +304,7 @@ function fetchBytes(input, policy, options = {}) {
             else
                 resolve(value);
         };
+        const started = Date.now();
         const timer = setTimeout(() => finish(new LoaderError('TIMEOUT', `no complete answer within ${policy.network.timeout} ms`)), policy.network.timeout);
         const go = (url, hops) => {
             try {
@@ -305,11 +352,11 @@ function fetchBytes(input, policy, options = {}) {
                     chunks.push(chunk);
                 });
                 res.on('error', e => finish(e));
-                res.on('end', () => finish(null, {
-                    data: Buffer.concat(chunks),
-                    contentType: String(res.headers['content-type'] ?? ''),
-                    url: url.href
-                }));
+                res.on('end', () => {
+                    if (logger_1.log.enabled('debug'))
+                        logger_1.log.debug(`fetched ${describeUrl(url)}: ${size} bytes in ${Date.now() - started} ms${hops ? ` after ${hops} redirect(s)` : ''}`);
+                    finish(null, { data: Buffer.concat(chunks), contentType: String(res.headers['content-type'] ?? ''), url: url.href });
+                });
             });
             current = req;
             req.on('error', e => finish(e instanceof LoaderError ? e : new LoaderError('FAILED', `${describeUrl(url)}: ${e.message}`)));
@@ -326,6 +373,31 @@ function fetchBytes(input, policy, options = {}) {
     });
 }
 /* ---------- local files ---------- */
+const READ_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'bmp', 'ico', 'svg', 'ttf', 'otf', 'woff', 'woff2', 'ttc', 'json']);
+const WRITE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp', 'avif', 'gif']);
+const DATABASE_NAME = /\.(db|sqlite|sqlite3|db3|sdb)$|-(wal|shm|journal)$/i;
+/** Refuses files: true would otherwise expose: hidden files and folders, node_modules, databases, other kinds of files. */
+function guard(path, root, kind, folderOk) {
+    const parts = (0, node_path_1.relative)(root, path).split(node_path_1.sep).filter(Boolean);
+    const bad = parts.find(x => x.startsWith('.') || x === 'node_modules');
+    if (bad)
+        throw new LoaderError('NOT_ALLOWED', `${path}: ${bad} is never ${kind === 'read' ? 'read' : 'written'} with files.${kind}: true (hidden files and node_modules are refused)`);
+    const name = parts[parts.length - 1] ?? '';
+    if (DATABASE_NAME.test(name))
+        throw new LoaderError('NOT_ALLOWED', `${path}: database files are refused with files.${kind}: true`);
+    if (folderOk)
+        return;
+    const ext = name.includes('.') ? name.slice(name.lastIndexOf('.') + 1).toLowerCase() : '';
+    if (!(kind === 'read' ? READ_EXTENSIONS : WRITE_EXTENSIONS).has(ext))
+        throw new LoaderError('NOT_ALLOWED', `${path}: only ${[...(kind === 'read' ? READ_EXTENSIONS : WRITE_EXTENSIONS)].join(', ')} files are allowed with files.${kind}: true`);
+}
+const OFF_READ = 'local reads are off: set files: { read: "./assets" } to the folder your images and fonts are in (or read: true for the bot folder, guarded)';
+const OFF_WRITE = 'file writes are off: set files: { write: "./output" } to an existing folder (or write: true for the bot folder, guarded)';
+/** A path for the log, relative to the working folder when it is inside it. */
+function describePath(path) {
+    const rel = (0, node_path_1.relative)(process.cwd(), path);
+    return rel && !rel.startsWith('..') && !(0, node_path_1.isAbsolute)(rel) ? rel : path;
+}
 function inside(child, root, allowSelf = false) {
     const rel = (0, node_path_1.relative)(root, child);
     if (rel === '')
@@ -347,7 +419,7 @@ async function realRoot(root) {
 async function resolveReadPath(path, policy, kind = 'file') {
     const root = policy.files.read;
     if (!root)
-        throw new LoaderError('NOT_ALLOWED', `local file ${path} refused: local reads are off (set files.read)`);
+        throw new LoaderError('NOT_ALLOWED', `local file ${path} refused: ${OFF_READ}`);
     if (path.includes('\0'))
         throw new LoaderError('NOT_ALLOWED', 'path contains a NUL byte');
     const allowSelf = kind !== 'file';
@@ -369,29 +441,42 @@ async function resolveReadPath(path, policy, kind = 'file') {
         throw new LoaderError('FAILED', `${abs} is not a ${kind === 'folder' ? 'folder' : 'file'}`);
     if (folder && !inside(real, await realRoot(root), true))
         throw new LoaderError('NOT_ALLOWED', `${abs} is outside files.read`);
+    if (policy.files.readGuarded) {
+        // the name asked for and the file it really is (a link inside the folder) must both pass
+        guard(abs, root, 'read', folder);
+        guard(real, await realRoot(root), 'read', folder);
+    }
     return { path: real, size: st.size, folder };
 }
 /** Lexical check only, for paths a library will open later (Lottie assets). */
 function assertReadablePath(path, policy) {
     const root = policy.files.read;
     if (!root)
-        throw new LoaderError('NOT_ALLOWED', `local file ${path} refused: local reads are off (set files.read)`);
+        throw new LoaderError('NOT_ALLOWED', `local file ${path} refused: ${OFF_READ}`);
     const abs = (0, node_path_1.resolve)(path);
     if (path.includes('\0') || !inside(abs, root, true))
         throw new LoaderError('NOT_ALLOWED', `local file ${abs} is outside files.read (${root})`);
+    if (policy.files.readGuarded)
+        guard(abs, root, 'read', false);
     return abs;
 }
 async function readLocal(path, policy) {
     const { path: real, size } = await resolveReadPath(path, policy);
     if (size > policy.network.maxBytes)
         throw new LoaderError('TOO_LARGE', `local file ${real} is ${size} bytes (network.maxBytes ${policy.network.maxBytes})`);
-    return node_fs_1.promises.readFile(real);
+    const data = await node_fs_1.promises.readFile(real);
+    // files.read: true: a database renamed to .png is still a database
+    if (policy.files.readGuarded && data.subarray(0, 16).toString('latin1') === 'SQLite format 3\0')
+        throw new LoaderError('NOT_ALLOWED', `${describePath(real)} is a SQLite database: refused with files.read: true`);
+    if (logger_1.log.enabled('debug'))
+        logger_1.log.debug(`read ${describePath(real)}: ${data.length} bytes`);
+    return data;
 }
 /** Writes inside files.write only, without following a symbolic link at the target. */
 async function writeLocal(path, data, policy) {
     const root = policy.files.write;
     if (!root)
-        throw new LoaderError('NOT_ALLOWED', `writing ${path} refused: file writes are off (set files.write)`);
+        throw new LoaderError('NOT_ALLOWED', `writing ${path} refused: ${OFF_WRITE}`);
     if (path.includes('\0'))
         throw new LoaderError('NOT_ALLOWED', 'path contains a NUL byte');
     const abs = (0, node_path_1.resolve)(path);
@@ -407,6 +492,8 @@ async function writeLocal(path, data, policy) {
     if (!inside(dir, await realRoot(root), true))
         throw new LoaderError('NOT_ALLOWED', `${abs} links outside files.write (${root})`);
     const target = (0, node_path_1.join)(dir, (0, node_path_1.basename)(abs));
+    if (policy.files.writeGuarded)
+        guard(target, await realRoot(root), 'write', false);
     const existing = await node_fs_1.promises.lstat(target).catch(() => null);
     if (existing?.isSymbolicLink())
         throw new LoaderError('NOT_ALLOWED', `${target} is a symbolic link`);
@@ -415,6 +502,8 @@ async function writeLocal(path, data, policy) {
     const flags = typeof node_fs_1.constants.O_NOFOLLOW === 'number'
         ? node_fs_1.constants.O_WRONLY | node_fs_1.constants.O_CREAT | node_fs_1.constants.O_TRUNC | node_fs_1.constants.O_NOFOLLOW : 'w';
     await node_fs_1.promises.writeFile(target, data, { flag: flags });
+    if (logger_1.log.enabled('debug'))
+        logger_1.log.debug(`wrote ${describePath(target)}: ${data.length} bytes`);
     return target;
 }
 function sourceKind(src) {
@@ -450,17 +539,116 @@ async function loadImageFrom(src, policy, loadOptions, fetchOptions = {}) {
         return src;
     if (src instanceof URL)
         src = src.href;
-    const data = typeof src === 'string'
+    let data = typeof src === 'string'
         ? await loadSource(src, policy, {
             maxRedirects: loadOptions?.maxRedirects,
             headers: loadOptions?.requestOptions?.headers,
             ...fetchOptions
         })
         : src;
+    if (typeof data === 'string')
+        data = dataUrlBytes(data);
+    const bytes = Buffer.isBuffer(data) ? data : Buffer.from(data);
+    // the size an image decodes to is in its header: refuse a small file that would decode to a huge bitmap
+    const size = imageDimensions(bytes);
+    const max = policy.limits.maxImagePixels;
+    if (size && size.width * size.height > max)
+        throw new LoaderError('TOO_LARGE', `the image is ${size.width}x${size.height} (${size.format}), over limits.maxImagePixels ${max}`);
+    let image;
     try {
-        return await (0, canvas_1.loadImage)(data, { alt: loadOptions?.alt });
+        image = await (0, canvas_1.loadImage)(bytes, { alt: loadOptions?.alt });
     }
     catch (e) {
         throw new LoaderError('FAILED', `could not decode the image: ${e?.message ?? e}`);
     }
+    if (!size && image.width * image.height > max)
+        throw new LoaderError('TOO_LARGE', `the image is ${image.width}x${image.height}, over limits.maxImagePixels ${max}`);
+    return image;
+}
+/** Bytes of a data: URL (base64 or percent-encoded); a malformed one fails like a broken image. */
+function dataUrlBytes(url) {
+    const m = /^\s*data:([^,]*),(.*)$/is.exec(url);
+    if (!m)
+        throw new LoaderError('FAILED', 'invalid data: URL');
+    return /;base64$/i.test(m[1].trim()) ? Buffer.from(m[2].replace(/\s+/g, ''), 'base64') : Buffer.from(decodeURIComponent(m[2]), 'utf8');
+}
+/**
+ * Width and height from an image's header, without decoding it: PNG, GIF, JPEG, WebP, BMP, AVIF/HEIF and
+ * SVG (width/height attributes or viewBox). null when the format is not recognised; the size is then
+ * checked after decoding.
+ */
+function imageDimensions(b) {
+    try {
+        if (b.length >= 24 && b.readUInt32BE(0) === 0x89504e47 && b.toString('latin1', 12, 16) === 'IHDR')
+            return { width: b.readUInt32BE(16), height: b.readUInt32BE(20), format: 'png' };
+        if (b.length >= 10 && b.toString('latin1', 0, 4) === 'GIF8')
+            return { width: b.readUInt16LE(6), height: b.readUInt16LE(8), format: 'gif' };
+        if (b.length >= 26 && b.toString('latin1', 0, 2) === 'BM')
+            return { width: Math.abs(b.readInt32LE(18)), height: Math.abs(b.readInt32LE(22)), format: 'bmp' };
+        if (b.length >= 30 && b.toString('latin1', 0, 4) === 'RIFF' && b.toString('latin1', 8, 12) === 'WEBP') {
+            const kind = b.toString('latin1', 12, 16);
+            if (kind === 'VP8 ')
+                return { width: b.readUInt16LE(26) & 0x3fff, height: b.readUInt16LE(28) & 0x3fff, format: 'webp' };
+            if (kind === 'VP8L') {
+                const v = b.readUInt32LE(21);
+                return { width: (v & 0x3fff) + 1, height: ((v >> 14) & 0x3fff) + 1, format: 'webp' };
+            }
+            if (kind === 'VP8X')
+                return { width: b.readUIntLE(24, 3) + 1, height: b.readUIntLE(27, 3) + 1, format: 'webp' };
+        }
+        if (b.length >= 4 && b[0] === 0xff && b[1] === 0xd8) {
+            let i = 2;
+            while (i + 9 < b.length) {
+                if (b[i] !== 0xff) {
+                    i++;
+                    continue;
+                }
+                const marker = b[i + 1];
+                if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+                    i += 2;
+                    continue;
+                }
+                const len = b.readUInt16BE(i + 2);
+                if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker))
+                    return { width: b.readUInt16BE(i + 7), height: b.readUInt16BE(i + 5), format: 'jpeg' };
+                i += 2 + len;
+            }
+            return null;
+        }
+        if (b.length >= 12 && b.toString('latin1', 4, 8) === 'ftyp') {
+            const at = b.indexOf('ispe', 0, 'latin1');
+            if (at > 0 && at + 16 <= b.length)
+                return { width: b.readUInt32BE(at + 8), height: b.readUInt32BE(at + 12), format: 'avif' };
+            return null;
+        }
+        const head = b.toString('utf8', 0, Math.min(b.length, 4096));
+        const svg = /<svg\b[^>]*>/i.exec(head)?.[0];
+        if (svg) {
+            const attr = (k) => { const m = new RegExp(`\\b${k}\\s*=\\s*["']\\s*([\\d.]+)`, 'i').exec(svg); return m ? Math.ceil(Number(m[1])) : null; };
+            const vb = /\bviewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i.exec(svg);
+            const width = attr('width') ?? (vb ? Math.ceil(Number(vb[1])) : 300);
+            const height = attr('height') ?? (vb ? Math.ceil(Number(vb[2])) : 150);
+            return { width, height, format: 'svg' };
+        }
+    }
+    catch { /* a truncated header: let the decoder report it */ }
+    return null;
+}
+/** Throws when a canvas (or GIF encoder) of width x height is over limits.maxCanvasPixels. */
+function checkCanvasSize(width, height, policy, what = 'canvas') {
+    const max = policy.limits.maxCanvasPixels;
+    if (!(width * height <= max))
+        throw new LoaderError('TOO_LARGE', `a ${width}x${height} ${what} is over limits.maxCanvasPixels ${max}`);
+}
+const gifUsage = new WeakMap();
+/** Counts a frame added to a GIF encoder against limits.maxGifFrames and limits.maxGifPixels. */
+function countGifFrame(encoder, pixels, policy) {
+    const u = gifUsage.get(encoder) ?? { frames: 0, pixels: 0 };
+    if (u.frames + 1 > policy.limits.maxGifFrames)
+        throw new LoaderError('TOO_LARGE', `the GIF already has ${u.frames} frames (limits.maxGifFrames ${policy.limits.maxGifFrames})`);
+    if (u.pixels + pixels > policy.limits.maxGifPixels)
+        throw new LoaderError('TOO_LARGE', `the GIF's frames would hold ${u.pixels + pixels} pixels (limits.maxGifPixels ${policy.limits.maxGifPixels})`);
+    u.frames++;
+    u.pixels += pixels;
+    gifUsage.set(encoder, u);
 }

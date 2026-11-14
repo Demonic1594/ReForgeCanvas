@@ -46,7 +46,7 @@ export default new NativeFunction({
 
             image = manager?.get(path);
         } else if (path.startsWith('preload://'))
-            image = ctx.client.preloadImages.get(path);
+            image = ctx.client.preloadImages.get(path.slice(10));
         else try {
             image = await imageManagerOf(ctx).load(path);
         } catch (e) { return loaderFailure(this, e) }
