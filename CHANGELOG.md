@@ -28,8 +28,9 @@ Every fix below was found in the 1.3.1 source (or in @napi-rs/canvas 1.1.1 and u
 - `registerFonts()` from JavaScript accepts a policy as its third argument. Without one it trusts the caller (local paths anywhere) but uses the network limits.
 - `ImageManager` takes a policy (`new ImageManager(policy)`) and has `cache(name, image)` for capped entries; `set()` entries are never evicted.
 - ForgeCanvas loaded next to ReForgeCanvas: an error is logged, ForgeCanvas is not started, and ReForgeCanvas keeps its functions.
+- Node 22 or newer (`engines`): ForgeScript 2.8.0 depends on chalk 6, which requires Node 22, and `npm test` relies on Node 22's test-file globs.
 - `undici` is no longer used (it was imported without being a dependency).
-- Added `npm test` (node:test, 43 tests in 6 groups, also passing on ForgeScript 2.5.0), `npm run lint` (`tsc --noEmit` and `scripts/lint.js`), and CI on Node 20 and 22 that also checks `dist/` and `metadata/` are up to date.
+- Added `npm test` (node:test, 43 tests in 6 groups, also passing on ForgeScript 2.5.0), `npm run lint` (`tsc --noEmit` and `scripts/lint.js`), and CI on Node 22 and 24 that also checks `dist/` and `metadata/` are up to date.
 
 ### Fixed
 - `$saveCanvas` always failed with `image/png is not valid format` (it passed a MIME type where the format name was expected).
