@@ -59,7 +59,7 @@ exports.default = new forgescript_1.NativeFunction({
     async execute(ctx, [name, x, y, width, height]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         const data = (ctx.getEnvironmentKey('progressBarData') ?? []);
         const options = (ctx.getEnvironmentKey('progressBarOptions') ?? {});
         const type = options.type ?? 'normal';
@@ -70,7 +70,7 @@ exports.default = new forgescript_1.NativeFunction({
         if (type === 'normal') {
             const progress = data[0];
             if (!progress)
-                return this.customError("No bar data provided" /* ForgeCanvasError.NoBarData */);
+                return this.customError("No bar data provided" /* ReForgeCanvasError.NoBarData */);
             const style = await (0, __1.resolveStyle)(this, ctx, canvas, progress.style ?? '#0');
             if (style instanceof forgescript_1.Return)
                 return style;

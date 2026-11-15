@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { Encoder } from '@gifsx/gifsx';
 
-import { GIFManager } from '../..';
+import { ReForgeCanvasError, GIFManager, checkCanvasSize, loaderFailure, policyOf } from '../..';
 
 export default new NativeFunction({
     name: '$newGIFEncoder',
@@ -64,6 +64,7 @@ export default new NativeFunction({
         if (!r?.success) return r;
 
         try { palette = JSON.parse(palette) } catch(_){};
+        try { checkCanvasSize(width, height, policyOf(ctx.client), 'GIF') } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.GIFTooLarge, ReForgeCanvasError.GIFTooLarge) }
         
         const previous = manager.currentEncoder;
         manager.currentEncoder = new Encoder(

@@ -31,7 +31,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, width]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         if (!width)
             return this.success(canvas.ctx.lineWidth);
         canvas.ctx.lineWidth = width;

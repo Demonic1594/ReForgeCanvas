@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, MeasureTextProperty, validateFont } from '../..';
+import { ReForgeCanvasError, MeasureTextProperty, validateFont } from '../..';
 
 export default new NativeFunction({
     name: '$measureText',
@@ -45,7 +45,7 @@ export default new NativeFunction({
     ],
     async execute (ctx, [name, text, font, property]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         const valid = validateFont(font);
         if (!valid || typeof valid === 'string') return this.customError(valid);

@@ -5,6 +5,7 @@
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { indexedToRgba } from '@gifsx/gifsx';
+import { indexedProblem } from '../..';
 
 export default new NativeFunction({
     name: '$indexedToRgba',
@@ -37,11 +38,14 @@ export default new NativeFunction({
         }
     ],
     execute (_, [palette, transparent, pixels]) {
+        const px = Uint8Array.from(pixels);
+        const pal = Array.isArray(palette) ? Uint8Array.from(palette as number[]) : null;
+        const problem = indexedProblem(px, pal);
+        if (problem) return this.customError(problem);
         try {
             const res = indexedToRgba(
-                Uint8Array.from(pixels),
-                Uint8Array.from(palette as unknown as number[]),
-                transparent
+                px, pal!,
+                typeof transparent === 'number' && !Number.isNaN(transparent) ? transparent : undefined
             );
             return this.success(`[${res.join(', ')}]`);
         } catch(e) {

@@ -3,7 +3,7 @@
 * Copyright © 2026 BotForge
 */
 
-import { SKRSContext2D, createCanvas, CanvasGradient, Image, loadImage, LottieAnimation, LoadImageOptions } from '@napi-rs/canvas';
+import { SKRSContext2D, createCanvas, CanvasGradient, Image, LottieAnimation, LoadImageOptions } from '@napi-rs/canvas';
 import { DecodeOptions, Decoder, Encoder, Frame, NeuQuant } from '@gifsx/gifsx';
 
 import { ForgeFunction, IForgeFunction, Logger } from '@tryforge/forgescript';
@@ -12,6 +12,8 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { CanvasBuilder, GradientType } from '..';
+import { log, LOG_PREFIX } from '../structures/logger';
+import { describeUrl, DEFAULT_POLICY, FetchOptions, ImageSource, LoaderPolicy, loadImageFrom } from '../structures/loader';
 
 class Manager<T> {
     public map: Map<string, T>;
@@ -102,32 +104,69 @@ export class GradientManager extends Manager<CanvasGradient> {
 
 export class ImageManager extends Manager<Image> {
     public loadOptions?: LoadImageOptions;
+    /** The loader policy this manager's loads follow (the bot's, or the strict defaults). */
+    public policy: LoaderPolicy;
+    /** Names stored by the automatic cache, oldest first; capped by policy.cache.maxImages. */
+    private cached = new Set<string>();
 
-    public set(name: string, image: Image) { this.map.set(name, image) }
-    
-    load(src: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL): Promise<Image>;
-    load(name: string, src: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL): Promise<Image>;
-    public async load(
-        name: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL,
-        src?: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL
-    ) {
-        if (name instanceof Image) return name;
-        
-        const image = await loadImage(src ?? name, this.loadOptions);
-        if (typeof name === 'string') this.map.set(name, image);
-
-        return image;
+    constructor(policy?: LoaderPolicy) {
+        super();
+        this.policy = policy ?? DEFAULT_POLICY;
     }
 
-    public async tryGet(name: string, src: string | Buffer | Uint8Array | Image | ArrayBufferLike | URL) {
-        let image = this.map.get(name);
-        if (image) return image;
+    public set(name: string, image: Image) {
+        this.cached.delete(name);
+        this.map.set(name, image);
+    }
 
-        image = await this.load(name, src);
+    /** Stores an image the extension cached by itself (emojis, URLs, patterns); the oldest go first. */
+    public cache(name: string, image: Image) {
+        this.cached.delete(name);
+        this.cached.add(name);
         this.map.set(name, image);
 
+        const max = this.policy.cache.maxImages;
+        for (const oldest of this.cached) {
+            if (this.cached.size <= max) break;
+            this.cached.delete(oldest);
+            this.map.delete(oldest);
+        }
+    }
+
+    public remove(name: string) {
+        this.cached.delete(name);
+        this.map.delete(name);
+    }
+
+    load(src: ImageSource, fetchOptions?: FetchOptions): Promise<Image>;
+    load(name: string, src: ImageSource, fetchOptions?: FetchOptions): Promise<Image>;
+    public async load(name: ImageSource, src?: ImageSource | FetchOptions, fetchOptions?: FetchOptions) {
+        if (name instanceof Image) return name;
+        if (src !== undefined && !isImageSource(src)) {
+            fetchOptions = src as FetchOptions;
+            src = undefined;
+        }
+
+        const image = await loadImageFrom((src as ImageSource | undefined) ?? name, this.policy, this.loadOptions, fetchOptions);
+        if (typeof name === 'string') this.cache(name, image);
+
         return image;
     }
+
+    public async tryGet(name: string, src: ImageSource, fetchOptions?: FetchOptions) {
+        const image = this.map.get(name);
+        if (image) {
+            if (log.enabled('debug')) log.debug(`cache hit: ${/^https?:/i.test(name) ? describeUrl(name) : name}`);
+            return image;
+        }
+        return this.load(name, src, fetchOptions ?? {});
+    }
+}
+
+function isImageSource(x: unknown): x is ImageSource {
+    return typeof x === 'string' || x instanceof URL || x instanceof Image
+        || Buffer.isBuffer(x) || x instanceof Uint8Array || x instanceof ArrayBuffer
+        || (typeof SharedArrayBuffer !== 'undefined' && x instanceof SharedArrayBuffer);
 }
 
 export class NeuQuantManager extends Manager<NeuQuant> {
@@ -147,8 +186,8 @@ export class ComponentManager extends Manager<ForgeFunction> {
         );
     }
 
-    public load(path: string, log?: boolean) {
-        if (!existsSync(path)) throw Logger.error(`Component ${path} does not exist`);
+    public load(path: string, verbose?: boolean) {
+        if (!existsSync(path)) { log.error(`Component ${path} does not exist`); throw new Error(`${LOG_PREFIX} Component ${path} does not exist`) }
         if (statSync(path).isFile()) {
             if(!path.endsWith('.js')) return;
             try {
@@ -156,9 +195,9 @@ export class ComponentManager extends Manager<ForgeFunction> {
                 const r = require(path);
                 const component = r?.default ?? r;
                 this.set(component);
-                if (log) Logger.info(`Successfully loaded component: ${component.data?.name ?? component.name}`);
-            } catch (error) { throw Logger.error(`Failed to load component ${path}: ${error}`) }
+                if (verbose) log.print(`Successfully loaded component: ${component.data?.name ?? component.name}`);
+            } catch (error) { log.error(`Failed to load component ${path}: ${error}`); throw new Error(`${LOG_PREFIX} Failed to load component ${path}: ${error}`) }
         } else for (const child of readdirSync(path))
-            this.load(join(path, child), log);
+            this.load(join(path, child), verbose);
     }
 }

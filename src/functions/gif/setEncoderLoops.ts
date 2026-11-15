@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$setEncoderLoops',
@@ -37,7 +37,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, loops]) {
         const gif = ctx.gifManager?.getEncoderOrCurrent(name);
-        if (!gif) return this.customError(ForgeCanvasError.NoEncoder);
+        if (!gif) return this.customError(ReForgeCanvasError.NoEncoder);
 
         gif.setRepeat(loops);
         return this.success();

@@ -37,7 +37,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, loops]) {
         const gif = ctx.gifManager?.getEncoderOrCurrent(name);
         if (!gif)
-            return this.customError("No GIF encoder with provided name found" /* ForgeCanvasError.NoEncoder */);
+            return this.customError("No GIF encoder with provided name found" /* ReForgeCanvasError.NoEncoder */);
         gif.setRepeat(loops);
         return this.success();
     }

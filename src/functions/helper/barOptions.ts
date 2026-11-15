@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { BarOptions, ForgeCanvasError } from '../..';
+import { BarOptions, ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$barOptions',
@@ -33,14 +33,14 @@ export default new NativeFunction({
             switch (option) {
                 case 'type':
                     if (![ 'normal', 'pie', 'none' ].includes(value[0]))
-                        return this.customError(ForgeCanvasError.InvalidBarType);
+                        return this.customError(ReForgeCanvasError.InvalidBarType);
 
                     barOptions.type = value[0] !== 'none'
                         ? value[0] as any : undefined;
                     break;
                 case 'draw-type':
                     if (!['fill', 'stroke', 'clear', 'none'].includes(value[0]))
-                        return this.customError(ForgeCanvasError.InvalidRectType);
+                        return this.customError(ReForgeCanvasError.InvalidRectType);
 
                     barOptions['draw-type'] = value[0] !== 'none'
                         ? value[0] as any : undefined;
@@ -62,7 +62,7 @@ export default new NativeFunction({
                     break;
                 case 'background-type':
                     if (!['fill', 'stroke', 'clear', 'none'].includes(value[0]))
-                        return this.customError(ForgeCanvasError.InvalidRectType);
+                        return this.customError(ReForgeCanvasError.InvalidRectType);
 
                     barOptions['background-type'] = value[0] !== 'none'
                         ? value[0] as any : undefined;
@@ -76,7 +76,7 @@ export default new NativeFunction({
                 }
                 case 'direction':
                     if (!['horizontal', 'vertical', 'none'].includes(value[0]))
-                        return this.customError(ForgeCanvasError.InvalidBarDirection);
+                        return this.customError(ReForgeCanvasError.InvalidBarDirection);
 
                     barOptions.direction = value[0] !== 'none'
                         ? value[0] as any : undefined;
@@ -94,7 +94,7 @@ export default new NativeFunction({
                     break;
                 case 'left-type':
                     if (!['fill', 'stroke', 'clear', 'none'].includes(value[0]))
-                        return this.customError(ForgeCanvasError.InvalidRectType);
+                        return this.customError(ReForgeCanvasError.InvalidRectType);
 
                     barOptions['left-type'] = value[0] !== 'none'
                         ? value[0] as any : undefined;

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
-import { ForgeCanvasError, FillOrStrokeOrClear, resolveStyle } from '../..';
+import { ReForgeCanvasError, FillOrStrokeOrClear, resolveStyle } from '../..';
 
 export default new NativeFunction({
     name: '$drawRect',
@@ -74,10 +74,10 @@ export default new NativeFunction({
     ],
     async execute (ctx, [name, t, style, x, y, width, height, radius]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         if (!style?.length && (t === FillOrStrokeOrClear.fill || t === FillOrStrokeOrClear.stroke))
-            return this.customError(ForgeCanvasError.NoStyle);
+            return this.customError(ReForgeCanvasError.NoStyle);
 
         const s = await resolveStyle(this, ctx, canvas, style);
         if (s instanceof Return) return s;

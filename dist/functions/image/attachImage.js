@@ -37,7 +37,7 @@ exports.default = new forgescript_1.NativeFunction({
         }
         const img = manager?.get(name)?.src;
         if (!img || typeof img === 'string')
-            return this.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+            return this.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
         ctx.container.files.push(new discord_js_1.AttachmentBuilder(Buffer.from(img), { name: filename ?? `${name}.png` }));
         return this.success();
     }

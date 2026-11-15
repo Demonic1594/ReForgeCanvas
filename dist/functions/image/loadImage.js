@@ -30,12 +30,11 @@ exports.default = new forgescript_1.NativeFunction({
         }
     ],
     async execute(ctx, [name, src]) {
-        if (!(ctx.imageManager instanceof __1.ImageManager))
-            ctx.imageManager = new __1.ImageManager();
+        const manager = (0, __1.imageManagerOf)(ctx);
         const img = await (0, __1.resolveImage)(this, ctx, src);
         if (img instanceof forgescript_1.Return)
             return img;
-        ctx.imageManager.map.set(name, img);
+        manager.set(name, img);
         return this.success();
     }
 });

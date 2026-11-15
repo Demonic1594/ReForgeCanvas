@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.wordWidthCache = exports.charWidthCache = exports.CanvasBuilder = void 0;
 const canvas_1 = require("@napi-rs/canvas");
 const __1 = require("..");
+const loader_1 = require("../structures/loader");
 const gifsx_1 = require("@gifsx/gifsx");
 class CanvasBuilder {
     /**
@@ -286,7 +287,7 @@ class CanvasBuilder {
         const ctx = this.ctx;
         if (!(image instanceof canvas_1.Image))
             image = manager ? await manager.load(image)
-                : await (0, canvas_1.loadImage)(image);
+                : await (0, loader_1.loadImageFrom)(image, loader_1.DEFAULT_POLICY);
         width ??= srcWidth ?? image.width;
         height ??= srcHeight ?? image.height;
         [x, y] = this.align(x, y, width, height);
@@ -409,19 +410,19 @@ class CanvasBuilder {
         switch (method) {
             case __1.FilterMethod.add: {
                 if (!f || !value)
-                    throw new Error("No filter or value provided" /* ForgeCanvasError.NoFilterOrValue */);
+                    throw new Error("No filter or value provided" /* ReForgeCanvasError.NoFilterOrValue */);
                 ctx.filter = ctx.filter !== 'none' ? ctx.filter += fstr : fstr;
                 return;
             }
             case __1.FilterMethod.set: {
                 if (!f || !value)
-                    throw new Error("No filter or value provided" /* ForgeCanvasError.NoFilterOrValue */);
+                    throw new Error("No filter or value provided" /* ReForgeCanvasError.NoFilterOrValue */);
                 ctx.filter = fstr;
                 return;
             }
             case __1.FilterMethod.remove: {
                 if (!f)
-                    throw new Error("No filter provided" /* ForgeCanvasError.NoFilter */);
+                    throw new Error("No filter provided" /* ReForgeCanvasError.NoFilter */);
                 const filters = (0, __1.parseFilters)(ctx.filter).filter(x => x.filter !== f);
                 ctx.filter = filters.length ? filters.map(x => x.raw).join(' ') : 'none';
                 return;
@@ -434,7 +435,7 @@ class CanvasBuilder {
             case __1.FilterMethod.json: return (0, __1.parseFilters)(ctx.filter);
             case __1.FilterMethod.setRaw: {
                 if (!value)
-                    throw new Error("No filter or value provided" /* ForgeCanvasError.NoFilterOrValue */);
+                    throw new Error("No filter or value provided" /* ReForgeCanvasError.NoFilterOrValue */);
                 ctx.filter = value;
                 return;
             }

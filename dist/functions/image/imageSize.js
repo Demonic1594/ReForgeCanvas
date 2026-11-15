@@ -42,11 +42,16 @@ exports.default = new forgescript_1.NativeFunction({
             image = manager?.get(path);
         }
         else if (path.startsWith('preload://'))
-            image = ctx.client.preloadImages.get(path);
+            image = ctx.client.preloadImages.get(path.slice(10));
         else
-            image = await ctx.imageManager?.load(path);
+            try {
+                image = await (0, __1.imageManagerOf)(ctx).load(path);
+            }
+            catch (e) {
+                return (0, __1.loaderFailure)(this, e);
+            }
         if (!image)
-            return this.customError("Failed to load an image" /* ForgeCanvasError.ImageFail */);
+            return this.customError("Failed to load an image" /* ReForgeCanvasError.ImageFail */);
         return this.success(property !== null && property !== undefined // @ts-ignore
             ? image[__1.WidthOrHeight[(typeof property === 'string' ? __1.WidthOrHeight[property] : property)]]
             : JSON.stringify({ width: image.width, height: image.height }));

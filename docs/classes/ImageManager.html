@@ -1,5 +1,5 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ImageManager | @tryforge/forge.canvas</title><meta name="description" content="Documentation for @tryforge/forge.canvas"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
-<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">@tryforge/forge.canvas</a>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ImageManager | @tryforge/reforge.canvas</title><meta name="description" content="Documentation for @tryforge/reforge.canvas"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">@tryforge/reforge.canvas</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
 <div id="tsd-search-status" aria-live="polite" aria-atomic="true">
@@ -10,14 +10,14 @@
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
 <li><a href="" aria-current="page">ImageManager</a></li></ul>
 <h1>Class ImageManager</h1></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="567">
+<section class="tsd-panel tsd-hierarchy" data-refl="821">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-signature-type">Manager</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ImageManager</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L103">src/classes/manager.ts:103</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L105">src/classes/manager.ts:105</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -31,12 +31,14 @@
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#loadoptions" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>load<wbr/>Options?</span></a>
 <a href="#map" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>map</span></a>
+<a href="#policy" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>policy</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#get" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a>
+<div class="tsd-index-list"><a href="#cache" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>cache</span></a>
+<a href="#get" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a>
 <a href="#load" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>load</span></a>
-<a href="#remove" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove</span></a>
+<a href="#remove" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove</span></a>
 <a href="#set" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set</span></a>
 <a href="#tryget" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>try<wbr/>Get</span></a>
 </div></section></div></details></section></section>
@@ -47,12 +49,16 @@
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructorimagemanager"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">ImageManager</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">ImageManager</a><a href="#constructorimagemanager" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructorimagemanager"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">ImageManager</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">policy</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/LoaderPolicy.html" class="tsd-signature-type tsd-kind-interface">LoaderPolicy</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">ImageManager</a><a href="#constructorimagemanager" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">policy</span>: <a href="../interfaces/LoaderPolicy.html" class="tsd-signature-type tsd-kind-interface">LoaderPolicy</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">ImageManager</a></h4><aside class="tsd-sources">
-<p>Inherited from Manager&lt;Image&gt;.constructor</p>
+<p>Overrides Manager&lt;Image&gt;.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L19">src/classes/manager.ts:19</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L112">src/classes/manager.ts:112</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -60,16 +66,39 @@
 <h3 class="tsd-anchor-link" id="loadoptions"><code class="tsd-tag">Optional</code><span>load<wbr/>Options</span><a href="#loadoptions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">loadOptions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">LoadImageOptions</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L104">src/classes/manager.ts:104</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L106">src/classes/manager.ts:106</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="map"><span>map</span><a href="#map" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">map</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
 <p>Inherited from Manager.map</p>
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L17">src/classes/manager.ts:17</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L19">src/classes/manager.ts:19</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="policy"><span>policy</span><a href="#policy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">policy</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/LoaderPolicy.html" class="tsd-signature-type tsd-kind-interface">LoaderPolicy</a></div>
+<div class="tsd-comment tsd-typography"><p>The loader policy this manager's loads follow (the bot's, or the strict defaults).</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L108">src/classes/manager.ts:108</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="cache"><span>cache</span><a href="#cache" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="cache-1"><span class="tsd-kind-call-signature">cache</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">image</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#cache-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Stores an image the extension cached by itself (emojis, URLs, patterns); the oldest go first.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></span></li>
+<li><span><span class="tsd-kind-parameter">image</span>: <span class="tsd-signature-type">Image</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L123">src/classes/manager.ts:123</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="get"><span>get</span><a href="#get" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -83,35 +112,37 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Image</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><aside class="tsd-sources">
 <p>Inherited from Manager.get</p>
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L21">src/classes/manager.ts:21</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L23">src/classes/manager.ts:23</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="load"><span>load</span><a href="#load" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="load-1"><span class="tsd-kind-call-signature">load</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">src</span><span class="tsd-signature-symbol">:</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Image</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBufferLike</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span><a href="#load-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="load-1"><span class="tsd-kind-call-signature">load</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">src</span><span class="tsd-signature-symbol">:</span> <a href="../types/ImageSource.html" class="tsd-signature-type tsd-kind-type-alias">ImageSource</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">fetchOptions</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/FetchOptions.html" class="tsd-signature-type tsd-kind-interface">FetchOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span><a href="#load-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">src</span>: <br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Image</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBufferLike</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span></span></li></ul></div>
+<li><span><span class="tsd-kind-parameter">src</span>: <a href="../types/ImageSource.html" class="tsd-signature-type tsd-kind-type-alias">ImageSource</a></span></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">fetchOptions</span>: <a href="../interfaces/FetchOptions.html" class="tsd-signature-type tsd-kind-interface">FetchOptions</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L108">src/classes/manager.ts:108</a></li></ul></aside></div></li>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L141">src/classes/manager.ts:141</a></li></ul></aside></div></li>
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="load-2"><span class="tsd-kind-call-signature">load</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">src</span><span class="tsd-signature-symbol">:</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Image</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBufferLike</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span><a href="#load-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="load-2"><span class="tsd-kind-call-signature">load</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">src</span><span class="tsd-signature-symbol">:</span> <a href="../types/ImageSource.html" class="tsd-signature-type tsd-kind-type-alias">ImageSource</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fetchOptions</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/FetchOptions.html" class="tsd-signature-type tsd-kind-interface">FetchOptions</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span><a href="#load-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></span></li>
-<li><span><span class="tsd-kind-parameter">src</span>: <br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Image</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBufferLike</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span></span></li></ul></div>
+<li><span><span class="tsd-kind-parameter">src</span>: <a href="../types/ImageSource.html" class="tsd-signature-type tsd-kind-type-alias">ImageSource</a></span></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">fetchOptions</span>: <a href="../interfaces/FetchOptions.html" class="tsd-signature-type tsd-kind-interface">FetchOptions</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L109">src/classes/manager.ts:109</a></li></ul></aside></div></li></ul></section>
-<section class="tsd-panel tsd-member tsd-is-inherited">
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L142">src/classes/manager.ts:142</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="remove"><span>remove</span><a href="#remove" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-is-inherited">
-<li class="tsd-is-inherited">
+<ul class="tsd-signatures">
+<li class="">
 <div class="tsd-signature tsd-anchor-link" id="remove-1"><span class="tsd-kind-call-signature">remove</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#remove-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
@@ -119,9 +150,9 @@
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from Manager.remove</p>
+<p>Overrides Manager.remove</p>
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L22">src/classes/manager.ts:22</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L136">src/classes/manager.ts:136</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="set"><span>set</span><a href="#set" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -135,21 +166,22 @@
 <li><span><span class="tsd-kind-parameter">image</span>: <span class="tsd-signature-type">Image</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L106">src/classes/manager.ts:106</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L117">src/classes/manager.ts:117</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="tryget"><span>try<wbr/>Get</span><a href="#tryget" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="tryget-1"><span class="tsd-kind-call-signature">tryGet</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">src</span><span class="tsd-signature-symbol">:</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Image</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBufferLike</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>        <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span><a href="#tryget-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="tryget-1"><span class="tsd-kind-call-signature">tryGet</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">src</span><span class="tsd-signature-symbol">:</span> <a href="../types/ImageSource.html" class="tsd-signature-type tsd-kind-type-alias">ImageSource</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fetchOptions</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/FetchOptions.html" class="tsd-signature-type tsd-kind-interface">FetchOptions</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span><a href="#tryget-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></span></li>
-<li><span><span class="tsd-kind-parameter">src</span>: <br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">string</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Image</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">ArrayBufferLike</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><br/>    <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">URL</span></span></li></ul></div>
+<li><span><span class="tsd-kind-parameter">src</span>: <a href="../types/ImageSource.html" class="tsd-signature-type tsd-kind-type-alias">ImageSource</a></span></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">fetchOptions</span>: <a href="../interfaces/FetchOptions.html" class="tsd-signature-type tsd-kind-interface">FetchOptions</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Image</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tryforge/forgecanvas/blob/002a9cd81a5bfa975f5a7bced570e96794cedb16/src/classes/manager.ts#L122">src/classes/manager.ts:122</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/Demonic1594/ReForgeCanvas/blob/1a82c4561bcbaab7e91038b20db1711af129f1b1/src/classes/manager.ts#L156">src/classes/manager.ts:156</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -168,11 +200,11 @@
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#loadoptions"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>load<wbr/>Options</span></a><a href="#map" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>map</span></a></div></details>
+<div><a href="#loadoptions"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>load<wbr/>Options</span></a><a href="#map" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>map</span></a><a href="#policy"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>policy</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#get" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a><a href="#load"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>load</span></a><a href="#remove" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove</span></a><a href="#set"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set</span></a><a href="#tryget"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>try<wbr/>Get</span></a></div></details></div></details></div>
+<div><a href="#cache"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>cache</span></a><a href="#get" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a><a href="#load"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>load</span></a><a href="#remove"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove</span></a><a href="#set"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set</span></a><a href="#tryget"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>try<wbr/>Get</span></a></div></details></div></details></div>
 <div class="site-menu">
-<nav class="tsd-navigation"><a href="../modules.html">@tryforge/forge.canvas</a>
+<nav class="tsd-navigation"><a href="../modules.html">@tryforge/reforge.canvas</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
 <li>Loading...</li></ul></nav></div></div></div><footer>
 <p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>

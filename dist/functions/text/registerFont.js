@@ -16,7 +16,7 @@ exports.default = new forgescript_1.NativeFunction({
     args: [
         {
             name: 'src',
-            description: 'The font source path',
+            description: 'The font source: a URL (font file or stylesheet), or a path inside files.read',
             type: forgescript_1.ArgType.String,
             required: true,
             rest: false
@@ -36,12 +36,14 @@ exports.default = new forgescript_1.NativeFunction({
             rest: false
         }
     ],
-    async execute(_, [src, name, log]) {
+    async execute(ctx, [src, name, log]) {
         try {
-            return this.success(await (0, __1.registerFonts)([{ src: src, name }], log ?? false));
+            return this.success(await (0, __1.registerFonts)([{ src: src, name }], log ?? false, (0, __1.policyOf)(ctx.client)));
         }
         catch (e) {
-            return this.customError(e);
+            if (e instanceof __1.LoaderError)
+                return (0, __1.loaderFailure)(this, e, "Failed to register the font" /* ReForgeCanvasError.FontFail */);
+            return this.customError(e?.message ?? String(e));
         }
     }
 });

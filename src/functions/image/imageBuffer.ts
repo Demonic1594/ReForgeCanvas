@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { Image } from '@napi-rs/canvas';
 
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError, imageManagerOf, loaderFailure } from '../..';
 
 export default new NativeFunction({
     name: '$imageBuffer',
@@ -44,8 +44,12 @@ export default new NativeFunction({
             }
 
             image = manager?.get(path);
-        } else image = await ctx.imageManager?.load(path);
-        if (!image) return this.customError(ForgeCanvasError.NoImage);
+        } else if (path.startsWith('preload://'))
+            image = ctx.client.preloadImages.get(path.slice(10));
+        else try {
+            image = await imageManagerOf(ctx).load(path);
+        } catch (e) { return loaderFailure(this, e) }
+        if (!image) return this.customError(ReForgeCanvasError.NoImage);
 
         ctx.setEnvironmentKey(vname, Buffer.from(image.src));
         return this.success();

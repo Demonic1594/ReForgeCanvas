@@ -9,14 +9,14 @@ const __1 = require("../..");
 const package_json_1 = require("@napi-rs/canvas/package.json");
 exports.default = new forgescript_1.NativeFunction({
     name: '$canvasVersion',
-    description: 'Returns the forge.canvas version',
+    description: 'Returns the reforge.canvas version',
     version: '1.1.0',
     brackets: false,
     unwrap: true,
     args: [
         {
             name: '@napi-rs/canvas',
-            description: 'Returns the @napi-rs/canvas version used by forge.canvas instead if true',
+            description: 'Returns the @napi-rs/canvas version used by reforge.canvas instead if true',
             type: forgescript_1.ArgType.Boolean,
             rest: false,
             required: false,

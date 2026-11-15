@@ -4,7 +4,7 @@
 */
 
 import { ArgType, NativeFunction } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$colorMapRgba',
@@ -24,7 +24,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name]) {
         const nq = ctx.neuquantManager?.get(name);
-        if (!nq) return this.customError(ForgeCanvasError.NoNeuQuant);
+        if (!nq) return this.customError(ReForgeCanvasError.NoNeuQuant);
 
         return this.success(nq.colorMapRgba());
     }

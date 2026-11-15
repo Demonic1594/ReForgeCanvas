@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
-import { ForgeCanvasError, FillRule, resolveStyle } from '../..';
+import { ReForgeCanvasError, FillRule, resolveStyle } from '../..';
 
 export default new NativeFunction({
     name: '$fill',
@@ -39,7 +39,7 @@ export default new NativeFunction({
     ],
     async execute (ctx, [name, style, rule]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         const oldstyle = canvas.ctx.fillStyle,
               s = await resolveStyle(this, ctx, canvas, style);

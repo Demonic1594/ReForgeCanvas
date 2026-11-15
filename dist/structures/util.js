@@ -4,8 +4,11 @@
 * Copyright © 2026 BotForge
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Colors = exports.SUPPORTED_FONT_FORMATS = exports.hexRegex = exports.rgbaRegex = exports.filterRegex = exports.fontRegex = exports.httpsRegex = exports.wordRegex = exports.cacheRegex = exports.emojiRegex = exports.fontcssRegex = exports.urlRegex = void 0;
+exports.Colors = exports.EMOJI_HOSTS = exports.SUPPORTED_FONT_FORMATS = exports.hexRegex = exports.rgbaRegex = exports.filterRegex = exports.fontRegex = exports.httpsRegex = exports.wordRegex = exports.cacheRegex = exports.emojiRegex = exports.fontcssRegex = exports.urlRegex = void 0;
 exports.registerFonts = registerFonts;
+exports.imageManagerOf = imageManagerOf;
+exports.loaderFailure = loaderFailure;
+exports.isStyleSource = isStyleSource;
 exports.validateFont = validateFont;
 exports.parseFilters = parseFilters;
 exports.resolveStyle = resolveStyle;
@@ -15,13 +18,14 @@ exports.resolveFrame = resolveFrame;
 exports.parseText = parseText;
 exports.loadFrame = loadFrame;
 exports.parseArgs = parseArgs;
-const forgescript_1 = require("@tryforge/forgescript");
 const canvas_1 = require("@napi-rs/canvas");
 const gifsx_1 = require("@gifsx/gifsx");
-const undici_1 = require("undici");
 const node_path_1 = require("node:path");
 const node_fs_1 = require("node:fs");
 const __1 = require("..");
+const loader_1 = require("./loader");
+const logger_1 = require("./logger");
+const native_1 = require("./native");
 exports.urlRegex = /^url\(['"]?|['"]?\)$/g;
 exports.fontcssRegex = /\/\*\s*(?<subset>[\w-]+)\s*\*\/[\s\S]*?font-family:\s*['"]?(?<family>[^'";]+)['"]?;[\s\S]*?url\((?<url>[^)]+)\)/g;
 exports.emojiRegex = /<(a?):(\w+):(\d+)>/y;
@@ -33,69 +37,130 @@ exports.filterRegex = /([a-zA-Z-]+)\(([^)]+)\)/g;
 exports.rgbaRegex = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(\s*,\s*(0|1|0?\.\d+))?\s*\)$/;
 exports.hexRegex = /^#?([0-9A-Fa-f]{3,4}){1,2}$/;
 exports.SUPPORTED_FONT_FORMATS = ['ttf', 'otf', 'woff', 'woff2'];
-async function registerFonts(fonts, log) {
+const FONT_USER_AGENT = 'Mozilla/5.0 () Gecko/20100101 Firefox/147.0';
+/**
+ * Registers fonts from URLs (a font file or a stylesheet such as Google Fonts), files or folders.
+ * Called from JavaScript without a policy, it trusts the bot owner: local paths anywhere (as in
+ * ForgeCanvas), with the network limits. $registerFont passes the bot's policy.
+ * Fonts named by a downloaded stylesheet are always fetched over http(s), never read from disk.
+ */
+async function registerFonts(fonts, log, policy = loader_1.OWNER_POLICY) {
+    await registerFontList(fonts, log ?? false, policy, 0, { files: 0 }, null);
+}
+function countFont(policy, state, src) {
+    if (++state.files > policy.fonts.maxFiles)
+        throw new loader_1.LoaderError('NOT_ALLOWED', `more than ${policy.fonts.maxFiles} font files in one registration (fonts.maxFiles), at ${(0, loader_1.describeUrl)(src)}`);
+}
+async function registerFontList(fonts, log, policy, depth, state, base) {
+    if (depth > policy.fonts.maxDepth)
+        throw new loader_1.LoaderError('NOT_ALLOWED', `fonts nested more than ${policy.fonts.maxDepth} levels (fonts.maxDepth)`);
     for (const font of fonts) {
-        if (font.src.startsWith('url(') || font.src.startsWith('http')) {
-            font.src = font.src.replace(exports.urlRegex, '').trim();
-            if (exports.httpsRegex.test(font.src)) {
-                const { statusCode, headers, body } = await (0, undici_1.request)(font.src, {
-                    headers: { 'User-Agent': 'Mozilla/5.0 () Gecko/20100101 Firefox/147.0' }
+        let src = font.src.startsWith('url(') ? font.src.replace(exports.urlRegex, '').trim() : font.src.trim();
+        // Inside a stylesheet, every url() is resolved against the stylesheet: never a local path.
+        if (base) {
+            try {
+                src = new URL(src, base).href;
+            }
+            catch {
+                throw new loader_1.LoaderError('FAILED', `invalid font URL in stylesheet ${(0, loader_1.describeUrl)(base)}`);
+            }
+            if ((0, loader_1.sourceKind)(src) !== 'http')
+                throw new loader_1.LoaderError('NOT_ALLOWED', `stylesheet ${(0, loader_1.describeUrl)(base)} names a non-http font`);
+        }
+        if ((0, loader_1.sourceKind)(src) === 'http') {
+            countFont(policy, state, src);
+            const { data, contentType, url } = await (0, loader_1.fetchBytes)(src, policy, { headers: { 'User-Agent': FONT_USER_AGENT } });
+            if (contentType.startsWith('text/')) {
+                const families = [...data.toString('utf8').matchAll(exports.fontcssRegex)].map(match => {
+                    // @ts-expect-error
+                    const { url: u, subset, family = font.name } = match.groups;
+                    return { src: u, name: subset?.length ? `${family}-${subset.trim()}` : family };
                 });
-                if (statusCode >= 400)
-                    throw forgescript_1.Logger.error(`Failed to fetch font: ${font.src} (${statusCode})`);
-                if (headers['content-type']?.startsWith('text/')) {
-                    const families = [...(await body.text()).matchAll(exports.fontcssRegex)].map(match => {
-                        // @ts-expect-error
-                        const { url, subset, family = font.name } = match.groups;
-                        return { src: url, name: subset?.length ? `${family}-${subset.trim()}` : family };
-                    });
-                    if (!families.length)
-                        throw forgescript_1.Logger.error(`Invalid font CSS: ${font.name ?? font.src}`);
-                    await registerFonts(families, log);
-                }
-                else if (!canvas_1.GlobalFonts.register(Buffer.from(await body.arrayBuffer()), font.name ?? undefined) && log) {
-                    forgescript_1.Logger.warn(`Failed to register font: '${font.name ?? font.src}'`);
-                }
-                else if (log)
-                    forgescript_1.Logger.info(`Registered a font: ${font.name ?? font.src}`);
+                if (!families.length)
+                    throw new loader_1.LoaderError('FAILED', `invalid font CSS: ${font.name ?? (0, loader_1.describeUrl)(src)}`);
+                state.files--; // the stylesheet itself is not a font file
+                await registerFontList(families, log, policy, depth + 1, state, url);
+            }
+            else if (!canvas_1.GlobalFonts.register(data, font.name ?? undefined)) {
+                if (log)
+                    logger_1.log.print(`Failed to register font: '${font.name ?? (0, loader_1.describeUrl)(src)}'`);
+            }
+            else if (log)
+                logger_1.log.print(`Registered a font: ${font.name ?? (0, loader_1.describeUrl)(src)}`);
+            continue;
+        }
+        if ((0, loader_1.sourceKind)(src) !== 'path')
+            throw new loader_1.LoaderError('NOT_ALLOWED', `font source scheme of ${src.slice(0, 40)} is not allowed`);
+        let entry;
+        try {
+            entry = await (0, loader_1.resolveReadPath)(src, policy, 'any');
+        }
+        catch (e) {
+            if (e instanceof loader_1.LoaderError && e.code === 'FAILED') {
+                if (log)
+                    throw new Error(`Invalid font source: ${src}`);
                 continue;
             }
+            throw e;
         }
-        if (!(0, node_fs_1.existsSync)(font.src)) {
+        if (entry.folder) {
+            // a folder: its fonts and subfolders; hidden files and node_modules are never walked into
+            const children = (await node_fs_1.promises.readdir(entry.path, { withFileTypes: true }))
+                .filter(d => !d.name.startsWith('.') && d.name !== 'node_modules'
+                && (d.isDirectory() || exports.SUPPORTED_FONT_FORMATS.includes(d.name.split('.').pop().toLowerCase())));
+            await registerFontList(children.map(d => ({ src: (0, node_path_1.join)(entry.path, d.name) })), log, policy, depth + 1, state, null);
+            continue;
+        }
+        let filename = (0, node_path_1.basename)(entry.path);
+        if (!exports.SUPPORTED_FONT_FORMATS.includes(filename.split('.').pop()))
+            continue;
+        filename = font.name ?? filename.slice(0, filename.lastIndexOf('.'));
+        if (log && canvas_1.GlobalFonts.has(filename))
+            logger_1.log.warn(`Font with name '${filename}' already exists`);
+        if (!filename?.length)
+            throw new Error(`Font name cannot be empty: ${src}`);
+        if (filename.includes(','))
+            throw new Error(`Font name cannot contain commas: ${filename}`);
+        countFont(policy, state, src);
+        if (!canvas_1.GlobalFonts.register(await (0, loader_1.readLocal)(entry.path, policy), filename)) {
             if (log)
-                throw new Error(`Invalid font source: ${font.src}`);
-            return;
+                logger_1.log.print(`Failed to register font: ${filename} (${src})`);
+            continue;
         }
-        if ((0, node_fs_1.statSync)(font.src).isFile()) {
-            let filename = (0, node_path_1.basename)(font.src);
-            if (!exports.SUPPORTED_FONT_FORMATS.includes(filename.split('.').pop()))
-                return;
-            filename = font.name ?? filename.slice(0, filename.lastIndexOf('.'));
-            if (log && canvas_1.GlobalFonts.has(filename))
-                forgescript_1.Logger.warn(`Font with name '${filename}' already exists`);
-            if (!filename?.length)
-                throw new Error(`Font name cannot be empty: ${font.src}`);
-            if (filename.includes(','))
-                throw new Error(`Font name cannot contain commas: ${filename}`);
-            if (!canvas_1.GlobalFonts.register((0, node_fs_1.readFileSync)(font.src), filename) && log) {
-                forgescript_1.Logger.warn(`Failed to register font: ${filename} (${font.src})`);
-                continue;
-            }
-            if (log)
-                forgescript_1.Logger.info(`Registered a font: ${filename} (${font.src})`);
-        }
-        else
-            registerFonts((0, node_fs_1.readdirSync)(font.src).map(x => ({ src: (0, node_path_1.join)(font.src, x) })), log);
+        if (log)
+            logger_1.log.print(`Registered a font: ${filename} (${src})`);
     }
+}
+/** The ImageManager of this run, created with the bot's policy when missing. */
+function imageManagerOf(ctx) {
+    if (!(ctx.imageManager instanceof __1.ImageManager))
+        ctx.imageManager = new __1.ImageManager((0, loader_1.policyOf)(ctx.client));
+    return ctx.imageManager;
+}
+/**
+ * Logs why a load failed (with the detail) and returns a generic error for the user.
+ * Refusals say only that the source is not allowed or too large; never the address, path or library text.
+ */
+function loaderFailure(self, err, generic = "Failed to load an image" /* ReForgeCanvasError.ImageFail */, tooLarge = "This source is too large" /* ReForgeCanvasError.SourceTooLarge */) {
+    const code = err instanceof loader_1.LoaderError ? err.code : 'FAILED';
+    const detail = err instanceof Error ? err.message : String(err);
+    logger_1.log.warn(`${self?.data?.name ?? 'load'}: ${code} ${detail}`);
+    return self.customError(code === 'NOT_ALLOWED' ? "This source is not allowed" /* ReForgeCanvasError.SourceNotAllowed */
+        : code === 'TOO_LARGE' ? tooLarge
+            : generic);
+}
+/** True when a $drawImage source is meant as a style (colour, gradient://, pattern://) rather than an image. */
+function isStyleSource(src) {
+    return /^(gradient|pattern):\/\//.test(src) || exports.hexRegex.test(src) || exports.rgbaRegex.test(src) || Object.hasOwn(exports.Colors, src);
 }
 function validateFont(font) {
     const match = exports.fontRegex.exec(font);
     if (!match?.[0])
-        return "Invalid font format provided" /* ForgeCanvasError.InvalidFontFormat */;
+        return "Invalid font format provided" /* ReForgeCanvasError.InvalidFontFormat */;
     const families = match[6].split(',').map(x => x?.trim());
     for (const family of families)
         if (!canvas_1.GlobalFonts.has(family.replace(/['',]/g, '')))
-            return `${"Provided font does not exist" /* ForgeCanvasError.InvalidFont */} (${family})`;
+            return `${"Provided font does not exist" /* ReForgeCanvasError.InvalidFont */} (${family})`;
     return match;
 }
 function parseFilters(str) {
@@ -115,7 +180,7 @@ async function resolveStyle(self, ctx, canvas, style) {
     if (s[0] === 'gradient') {
         const gradient = ctx.gradientManager?.get(args);
         if (!gradient)
-            return self.customError("No gradient with provided name found" /* ForgeCanvasError.NoGradient */);
+            return self.customError("No gradient with provided name found" /* ReForgeCanvasError.NoGradient */);
         return gradient;
     }
     if (s[0] === 'pattern') {
@@ -141,7 +206,7 @@ async function resolveStyle(self, ctx, canvas, style) {
         if (type === 'canvas') {
             const canvas_2 = ctx.canvasManager?.get(repeat ? splits.join(':') : splits.join());
             if (!canvas_2)
-                return self.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+                return self.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
             image = canvas_2.ctx.canvas;
         }
         else if (type === 'images' && splits[0]?.startsWith('//')) {
@@ -150,15 +215,23 @@ async function resolveStyle(self, ctx, canvas, style) {
             const img = (meow ? ctx.client.preloadImages : ctx.imageManager)
                 ?.get(meow ? source.slice(10) : source);
             if (!img)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
             image = img;
         }
         else {
             const src = repeat ? splits.join(':') : `${type}:${splits.join(':')}`;
-            image = await (0, canvas_1.loadImage)(src, ctx.imageManager?.loadOptions ?? ctx.client.preloadImages.loadOptions);
-            (ctx.imageManager ??= new __1.ImageManager()).map.set(src, image);
+            const manager = imageManagerOf(ctx);
+            try {
+                image = await (0, loader_1.loadImageFrom)(src, manager.policy, ctx.imageManager?.loadOptions ?? ctx.client.preloadImages?.loadOptions);
+            }
+            catch (e) {
+                return loaderFailure(self, e);
+            }
+            manager.cache(src, image);
         }
         const pattern = canvas.ctx.createPattern(image, repeat);
+        if (!pattern)
+            return self.customError("Failed to load an image" /* ReForgeCanvasError.ImageFail */);
         if (x !== undefined && y !== undefined)
             pattern.setTransform(new DOMMatrix().translate(x, y));
         return pattern;
@@ -196,13 +269,17 @@ async function resolveImage(self, ctx, src) {
         case 'frame': {
             const frame = ctx.gifManager?.getFrame(src.slice(8));
             if (!frame)
-                return self.customError("No frame with provided name found" /* ForgeCanvasError.NoFrame */);
+                return self.customError("No frame with provided name found" /* ReForgeCanvasError.NoFrame */);
             const { width, height, buffer } = frame;
+            const rgba = buffer.length === width * height * 4;
+            const palette = rgba ? null : new Uint8Array(frame.palette ?? []);
+            const problem = rgba ? null : (0, native_1.indexedProblem)(buffer, palette);
+            if (problem)
+                return self.customError(problem);
             const canvas = (0, canvas_1.createCanvas)(width, height);
             const context = canvas.getContext('2d');
             const imageData = context.createImageData(width, height);
-            imageData.data.set(buffer.length === width * height * 4
-                ? buffer : (0, gifsx_1.indexedToRgba)(Uint8Array.from(buffer), new Uint8Array(frame.palette ?? []), frame.transparent));
+            imageData.data.set(rgba ? buffer : (0, gifsx_1.indexedToRgba)(Uint8Array.from(buffer), palette, frame.transparent));
             context.putImageData(imageData, 0, 0);
             img = await canvas.encode('png');
             break;
@@ -210,29 +287,33 @@ async function resolveImage(self, ctx, src) {
         case 'preload': {
             const image = ctx.client.preloadImages?.get(splitted.slice(1).join('//'));
             if (!image)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
             img = image;
             break;
         }
         case 'images': {
             const image = ctx.imageManager?.get(splitted.slice(1).join('//'));
             if (!image)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
             img = image;
             break;
         }
         case 'canvas': {
             const canvas = ctx.canvasManager?.get(splitted.slice(1).join('//'));
             if (!canvas)
-                return self.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+                return self.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
             img = await canvas.encode(__1.ImageFormat.png);
             break;
         }
         default: if (src?.includes('<svg'))
             img = `data:image/svg+xml;base64,${Buffer.from(src)?.toString('base64')}`;
     }
-    return await (0, canvas_1.loadImage)(img, ctx.imageManager?.loadOptions ?? ctx.client.preloadImages?.loadOptions)
-        .catch((e) => self.customError(e.toString()));
+    try {
+        return await (0, loader_1.loadImageFrom)(img, (0, loader_1.policyOf)(ctx.client), ctx.imageManager?.loadOptions ?? ctx.client.preloadImages?.loadOptions);
+    }
+    catch (e) {
+        return loaderFailure(self, e);
+    }
 }
 function rgbaStringToHex(rgba) {
     const match = rgba.match(exports.rgbaRegex);
@@ -271,18 +352,25 @@ async function resolveFrame(self, ctx, frame, speed) {
             const img = (meow ? ctx.client.preloadImages : ctx.imageManager)
                 ?.get(meow ? source.slice(10) : source);
             if (!img)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
-            return await loadFrame((ctx.imageManager ??= new __1.ImageManager()), img, speed);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
+            return await loadFrame(imageManagerOf(ctx), img, speed);
         }
         case 'canvas': {
             const canvas = ctx.canvasManager?.get(frame.slice(9));
             if (!canvas)
-                return self.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+                return self.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
             return gifsx_1.Frame.fromRgba(canvas.width, canvas.height, Uint8Array.from(canvas.inner.data()), speed);
         }
-        default: return await loadFrame((ctx.imageManager ?? (ctx.imageManager = new __1.ImageManager())), frame, speed);
+        default: try {
+            return await loadFrame(imageManagerOf(ctx), frame, speed);
+        }
+        catch (e) {
+            return loaderFailure(self, e, "Failed to load a frame" /* ReForgeCanvasError.FrameFail */);
+        }
     }
 }
+/** Emoji images come from a URL the extension builds (digits only), so this host is always allowed. */
+exports.EMOJI_HOSTS = ['cdn.discordapp.com'];
 async function parseText(client, text, parseNL, parseEmoji) {
     if (!text?.trim()?.length)
         return [];
@@ -293,6 +381,9 @@ async function parseText(client, text, parseNL, parseEmoji) {
     let cur = '';
     let sI = 0;
     let i = 0;
+    // each emoji is an image fetched from Discord's CDN: beyond limits.maxEmojisPerText they stay text
+    let emojis = 0;
+    const maxEmojis = (0, loader_1.policyOf)(client).limits.maxEmojisPerText;
     while (i < text.length) {
         const c = text[i];
         if (c === '\\') {
@@ -312,7 +403,7 @@ async function parseText(client, text, parseNL, parseEmoji) {
             sI = i;
             continue;
         }
-        else if (parseEmoji && c === '<') {
+        else if (parseEmoji && c === '<' && emojis < maxEmojis) {
             regex.lastIndex = i;
             const match = regex.exec(text);
             if (match) {
@@ -320,7 +411,8 @@ async function parseText(client, text, parseNL, parseEmoji) {
                 const id = match[3];
                 if (cur.length)
                     spans.push(cur);
-                spans.push(client.preloadImages.tryGet(`cache_emoji_${id}`, `https://cdn.discordapp.com/emojis/${id}.png`));
+                emojis++;
+                spans.push(client.preloadImages.tryGet(`cache_emoji_${id}`, `https://cdn.discordapp.com/emojis/${id}.png`, { extraHosts: exports.EMOJI_HOSTS }));
                 cur = '';
                 i += match[0].length;
                 sI = i;
@@ -336,7 +428,7 @@ async function parseText(client, text, parseNL, parseEmoji) {
 }
 async function loadFrame(manager, src, speed) {
     const img = manager ? await manager.load(src)
-        : await (0, canvas_1.loadImage)(src);
+        : await (0, loader_1.loadImageFrom)(src, loader_1.DEFAULT_POLICY);
     const canvas = (0, canvas_1.createCanvas)(img.width, img.height);
     canvas.getContext('2d').drawImage(img, 0, 0);
     return gifsx_1.Frame.fromRgba(canvas.width, canvas.height, Uint8Array.from(canvas.data()), speed);

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, FilterMethod, Filters } from '../..';
+import { ReForgeCanvasError, FilterMethod, Filters } from '../..';
 
 export default new NativeFunction({
     name: '$filter',
@@ -46,7 +46,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, method, filter, value]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         const res = canvas.filter(method, filter, value);
         return this.success(typeof res === 'object'

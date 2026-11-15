@@ -3,7 +3,7 @@
 * Copyright © 2026 BotForge
 */
 
-export const enum ForgeCanvasError {
+export const enum ReForgeCanvasError {
     EmptyName               = 'The name argument cannot be empty',
     
     NoCanvas                = 'No canvas with provided name found',
@@ -13,6 +13,14 @@ export const enum ForgeCanvasError {
     NoFilter                = 'No filter provided',
     NoFilterOrValue         = 'No filter or value provided',
     ImageFail               = 'Failed to load an image',
+    SourceNotAllowed        = 'This source is not allowed',
+    SourceTooLarge          = 'This source is too large',
+    WriteFail               = 'Failed to save the file',
+    GIFFail                 = 'Failed to load the GIF',
+    LottieFail              = 'Failed to load the Lottie animation',
+    FontFail                = 'Failed to register the font',
+    CanvasTooLarge          = 'This canvas is too large',
+    GIFTooLarge             = 'This GIF is too large',
     InvalidOffset           = 'The offset must be between 0 and 100',
     InvalidRectType         = 'Invalid rect type provided (Expected fill/stroke/clear)',
     InvalidLineDashSegments = 'Invalid line dash segments provided (Expected array of numbers)',

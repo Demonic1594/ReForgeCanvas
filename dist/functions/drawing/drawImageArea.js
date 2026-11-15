@@ -93,20 +93,21 @@ exports.default = new forgescript_1.NativeFunction({
         }
     ],
     async execute(ctx, [name, src, srcx, srcy, srcwidth, srcheight, x, y, width, height, radius]) {
-        const manager = ctx.imageManager instanceof __1.ImageManager ?
-            ctx.imageManager : ctx.imageManager = new __1.ImageManager();
+        const manager = (0, __1.imageManagerOf)(ctx);
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         srcwidth = num(srcwidth);
         srcheight = num(srcheight);
         width = num(width);
         height = num(height);
-        const img = await (0, __1.resolveImage)(this, ctx, src);
-        if (img instanceof forgescript_1.Return) {
+        const img = (0, __1.isStyleSource)(src) ? null : await (0, __1.resolveImage)(this, ctx, src);
+        if (img instanceof forgescript_1.Return)
+            return img;
+        if (img === null) {
             const style = await (0, __1.resolveStyle)(this, ctx, canvas, src);
             if (style instanceof forgescript_1.Return)
-                return img;
+                return style;
             canvas.ctx.fillStyle = style;
             canvas.rect(__1.FillOrStrokeOrClear.fill, x, y, width, height, radius.length === 1 ? radius[0] : radius);
             return this.success();

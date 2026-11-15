@@ -4,7 +4,7 @@
 */
 
 import { ArgType, NativeFunction } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$NQmapPixel',
@@ -52,7 +52,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, r, g, b, a]) {
         const nq = ctx.neuquantManager?.get(name);
-        if (!nq) return this.customError(ForgeCanvasError.NoNeuQuant);
+        if (!nq) return this.customError(ReForgeCanvasError.NoNeuQuant);
 
         nq.mapPixel(Uint8Array.from([r, g, b, a]))
         return this.success();

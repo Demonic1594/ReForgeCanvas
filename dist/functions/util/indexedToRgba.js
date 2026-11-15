@@ -6,6 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const forgescript_1 = require("@tryforge/forgescript");
 const gifsx_1 = require("@gifsx/gifsx");
+const __1 = require("../..");
 exports.default = new forgescript_1.NativeFunction({
     name: '$indexedToRgba',
     description: 'Converts indexed pixels to RGBA',
@@ -37,8 +38,13 @@ exports.default = new forgescript_1.NativeFunction({
         }
     ],
     execute(_, [palette, transparent, pixels]) {
+        const px = Uint8Array.from(pixels);
+        const pal = Array.isArray(palette) ? Uint8Array.from(palette) : null;
+        const problem = (0, __1.indexedProblem)(px, pal);
+        if (problem)
+            return this.customError(problem);
         try {
-            const res = (0, gifsx_1.indexedToRgba)(Uint8Array.from(pixels), Uint8Array.from(palette), transparent);
+            const res = (0, gifsx_1.indexedToRgba)(px, pal, typeof transparent === 'number' && !Number.isNaN(transparent) ? transparent : undefined);
             return this.success(`[${res.join(', ')}]`);
         }
         catch (e) {

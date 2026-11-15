@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$shadowOptions',
@@ -32,7 +32,7 @@ export default new NativeFunction({
     execute (ctx, [name, options]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
 
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
         if (typeof options === 'string') options = JSON.parse(options);
 
         const shadowOptions: Record<string, 'shadowColor' | 'shadowBlur' | 'shadowOffsetX' | 'shadowOffsetY'> = {

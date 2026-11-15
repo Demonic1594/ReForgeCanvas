@@ -6,11 +6,7 @@
 import { ArgType, NativeFunction } from '@tryforge/forgescript';
 import { Decoder } from '@gifsx/gifsx';
 
-import { fetch } from 'undici';
-
-import { readFile } from 'node:fs/promises';
-
-import { ForgeCanvasError, GIFManager } from '../..';
+import { ReForgeCanvasError, GIFManager, LoaderError, imageDimensions, loaderFailure, loadSource, policyOf } from '../..';
 
 export default new NativeFunction({
     name: '$newGIFDecoder',
@@ -29,7 +25,7 @@ export default new NativeFunction({
         },
         {
             name: 'path',
-            description: 'Path to the GIF file',
+            description: 'URL or path of the GIF file (local paths only inside files.read), or encoder://name',
             type: ArgType.String,
             required: true,
             rest: false
@@ -46,26 +42,31 @@ export default new NativeFunction({
         const manager = ctx.gifManager instanceof GIFManager ?
             ctx.gifManager : ctx.gifManager = new GIFManager();
 
-        let gif: ArrayBuffer | Uint8Array | Buffer | undefined;
-        if (path.startsWith('http://') || path.startsWith('https://')) {
-            const response = await fetch(path);
-            if (!response.ok) return this.customError(`Failed to fetch ${path}`);
-
-            gif = await response.arrayBuffer();
-        } else if (path.startsWith('encoder://')) {
+        let gif: Uint8Array | Buffer;
+        if (path.startsWith('encoder://')) {
             const encoder = manager.getEncoder(path.slice(10));
-            if (!encoder) return this.customError(ForgeCanvasError.NoEncoder);
+            if (!encoder) return this.customError(ReForgeCanvasError.NoEncoder);
 
             gif = encoder.getBuffer();
-        } else gif = await readFile(path, null);
+        } else try {
+            const data = await loadSource(path, policyOf(ctx.client));
+            if (typeof data === 'string') return this.customError(ReForgeCanvasError.GIFFail); // data: URLs were never supported here
+            gif = data;
+        } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.GIFFail) }
 
-        manager.setDecoder(
-            name,
-            new Decoder(
-                new Uint8Array(gif),
-                options ? manager.getDecodeOptions(options) : undefined
-            )
-        );
+        try {
+            const size = imageDimensions(Buffer.from(gif.buffer, gif.byteOffset, gif.byteLength));
+            const max = policyOf(ctx.client).limits.maxImagePixels;
+            if (size && size.width * size.height > max)
+                throw new LoaderError('TOO_LARGE', `the GIF is ${size.width}x${size.height}, over limits.maxImagePixels ${max}`);
+            manager.setDecoder(
+                name,
+                new Decoder(
+                    new Uint8Array(gif),
+                    options ? manager.getDecodeOptions(options) : undefined
+                )
+            );
+        } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.GIFFail) }
         return this.success();
     }
 });

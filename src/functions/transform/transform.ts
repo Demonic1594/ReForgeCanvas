@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$transform',
@@ -65,7 +65,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, ...matrix]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         canvas.ctx.transform(...matrix);
         return this.success();

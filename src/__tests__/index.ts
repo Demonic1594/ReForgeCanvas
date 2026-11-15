@@ -4,7 +4,7 @@
 */
 
 import { ArgType, ForgeClient } from '@tryforge/forgescript';
-import { ForgeCanvas, registerFonts } from '..';
+import { ReForgeCanvas, registerFonts } from '..';
 
 const client = new ForgeClient({
     intents: [
@@ -12,7 +12,7 @@ const client = new ForgeClient({
         'Guilds', 'MessageContent'
     ],
     events: ['messageCreate', 'interactionCreate', 'clientReady'],
-    extensions: [new ForgeCanvas()],
+    extensions: [new ReForgeCanvas({ files: { read: "./assets" } })],
     prefixes: ['.']
 });
 
@@ -24,7 +24,7 @@ registerFonts([
     { src: './assets/Twemoji.ttf', name: 'Twemoji' }
 ], true);
 
-ForgeCanvas.components.set({
+ReForgeCanvas.components.set({
     name: 'circle',
     params: [
         {
@@ -42,7 +42,7 @@ ForgeCanvas.components.set({
     code: '$drawRect[;fill;$env[style];0;0;$env[size];$env[size];$divide[$env[size];2]]]'
 })
 
-ForgeCanvas.components.set({
+ReForgeCanvas.components.set({
     name: 'circles',
     params: [
         {
@@ -63,6 +63,6 @@ ForgeCanvas.components.set({
     `
 });
 
-ForgeCanvas.components.load(__dirname + '/components', true);
+ReForgeCanvas.components.load(__dirname + '/components', true);
 
 client.login(process.env.TOKEN);

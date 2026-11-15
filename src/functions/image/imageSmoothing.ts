@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$imageSmoothing',
@@ -31,7 +31,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, enabled]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         return this.success(enabled !== null && enabled !== undefined
             ? (canvas.imageSmoothingEnabled = enabled, undefined)

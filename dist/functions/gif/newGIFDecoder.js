@@ -6,8 +6,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const forgescript_1 = require("@tryforge/forgescript");
 const gifsx_1 = require("@gifsx/gifsx");
-const undici_1 = require("undici");
-const promises_1 = require("node:fs/promises");
 const __1 = require("../..");
 exports.default = new forgescript_1.NativeFunction({
     name: '$newGIFDecoder',
@@ -26,7 +24,7 @@ exports.default = new forgescript_1.NativeFunction({
         },
         {
             name: 'path',
-            description: 'Path to the GIF file',
+            description: 'URL or path of the GIF file (local paths only inside files.read), or encoder://name',
             type: forgescript_1.ArgType.String,
             required: true,
             rest: false
@@ -43,21 +41,32 @@ exports.default = new forgescript_1.NativeFunction({
         const manager = ctx.gifManager instanceof __1.GIFManager ?
             ctx.gifManager : ctx.gifManager = new __1.GIFManager();
         let gif;
-        if (path.startsWith('http://') || path.startsWith('https://')) {
-            const response = await (0, undici_1.fetch)(path);
-            if (!response.ok)
-                return this.customError(`Failed to fetch ${path}`);
-            gif = await response.arrayBuffer();
-        }
-        else if (path.startsWith('encoder://')) {
+        if (path.startsWith('encoder://')) {
             const encoder = manager.getEncoder(path.slice(10));
             if (!encoder)
-                return this.customError("No GIF encoder with provided name found" /* ForgeCanvasError.NoEncoder */);
+                return this.customError("No GIF encoder with provided name found" /* ReForgeCanvasError.NoEncoder */);
             gif = encoder.getBuffer();
         }
         else
-            gif = await (0, promises_1.readFile)(path, null);
-        manager.setDecoder(name, new gifsx_1.Decoder(new Uint8Array(gif), options ? manager.getDecodeOptions(options) : undefined));
+            try {
+                const data = await (0, __1.loadSource)(path, (0, __1.policyOf)(ctx.client));
+                if (typeof data === 'string')
+                    return this.customError("Failed to load the GIF" /* ReForgeCanvasError.GIFFail */); // data: URLs were never supported here
+                gif = data;
+            }
+            catch (e) {
+                return (0, __1.loaderFailure)(this, e, "Failed to load the GIF" /* ReForgeCanvasError.GIFFail */);
+            }
+        try {
+            const size = (0, __1.imageDimensions)(Buffer.from(gif.buffer, gif.byteOffset, gif.byteLength));
+            const max = (0, __1.policyOf)(ctx.client).limits.maxImagePixels;
+            if (size && size.width * size.height > max)
+                throw new __1.LoaderError('TOO_LARGE', `the GIF is ${size.width}x${size.height}, over limits.maxImagePixels ${max}`);
+            manager.setDecoder(name, new gifsx_1.Decoder(new Uint8Array(gif), options ? manager.getDecodeOptions(options) : undefined));
+        }
+        catch (e) {
+            return (0, __1.loaderFailure)(this, e, "Failed to load the GIF" /* ReForgeCanvasError.GIFFail */);
+        }
         return this.success();
     }
 });

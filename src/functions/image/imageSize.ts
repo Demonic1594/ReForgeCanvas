@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { Image } from '@napi-rs/canvas';
 
-import { ForgeCanvasError, WidthOrHeight } from '../..';
+import { ReForgeCanvasError, WidthOrHeight, imageManagerOf, loaderFailure } from '../..';
 
 export default new NativeFunction({
     name: '$imageSize',
@@ -46,9 +46,11 @@ export default new NativeFunction({
 
             image = manager?.get(path);
         } else if (path.startsWith('preload://'))
-            image = ctx.client.preloadImages.get(path);
-        else image = await ctx.imageManager?.load(path);
-        if (!image) return this.customError(ForgeCanvasError.ImageFail);
+            image = ctx.client.preloadImages.get(path.slice(10));
+        else try {
+            image = await imageManagerOf(ctx).load(path);
+        } catch (e) { return loaderFailure(this, e) }
+        if (!image) return this.customError(ReForgeCanvasError.ImageFail);
 
         return this.success(property !== null && property !== undefined // @ts-ignore
             ? image[WidthOrHeight[

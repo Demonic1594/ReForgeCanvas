@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, GradientManager } from '../..';
+import { ReForgeCanvasError, GradientManager } from '../..';
 
 export default new NativeFunction({
     name: '$addColorStop',
@@ -38,13 +38,13 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, offset, color]) {
         if (!(offset / 100 >= 0 && offset / 100 <= 1))
-            return this.customError(ForgeCanvasError.InvalidOffset);
+            return this.customError(ReForgeCanvasError.InvalidOffset);
 
         if (!(ctx.gradientManager instanceof GradientManager))
             ctx.gradientManager = new GradientManager();
 
         const gradient = ctx.gradientManager?.get(name as string);
-        if (name && !gradient) return this.customError(ForgeCanvasError.NoGradient);
+        if (name && !gradient) return this.customError(ReForgeCanvasError.NoGradient);
 
         if (gradient) gradient.addColorStop(offset, color);
         else ctx.gradientManager.stops.push([offset, color]);

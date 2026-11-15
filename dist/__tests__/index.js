@@ -12,7 +12,7 @@ const client = new forgescript_1.ForgeClient({
         'Guilds', 'MessageContent'
     ],
     events: ['messageCreate', 'interactionCreate', 'clientReady'],
-    extensions: [new __1.ForgeCanvas()],
+    extensions: [new __1.ReForgeCanvas({ files: { read: "./assets" } })],
     prefixes: ['.']
 });
 client.applicationCommands.load('dist/__tests__/slash');
@@ -21,7 +21,7 @@ client.commands.load('dist/__tests__/commands');
     { src: 'https://fonts.googleapis.com/css2?family=Comfortaa&display=swap' },
     { src: './assets/Twemoji.ttf', name: 'Twemoji' }
 ], true);
-__1.ForgeCanvas.components.set({
+__1.ReForgeCanvas.components.set({
     name: 'circle',
     params: [
         {
@@ -38,7 +38,7 @@ __1.ForgeCanvas.components.set({
     brackets: true,
     code: '$drawRect[;fill;$env[style];0;0;$env[size];$env[size];$divide[$env[size];2]]]'
 });
-__1.ForgeCanvas.components.set({
+__1.ReForgeCanvas.components.set({
     name: 'circles',
     params: [
         {
@@ -58,5 +58,5 @@ __1.ForgeCanvas.components.set({
         $renderComponent[;circle;$env[size];$env[size];$env[style];$env[size]]
     `
 });
-__1.ForgeCanvas.components.load(__dirname + '/components', true);
+__1.ReForgeCanvas.components.load(__dirname + '/components', true);
 client.login(process.env.TOKEN);

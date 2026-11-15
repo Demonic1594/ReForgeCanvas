@@ -52,7 +52,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, r, g, b, a]) {
         const nq = ctx.neuquantManager?.get(name);
         if (!nq)
-            return this.customError("No NeuQuant Instance with provided name found" /* ForgeCanvasError.NoNeuQuant */);
+            return this.customError("No NeuQuant Instance with provided name found" /* ReForgeCanvasError.NoNeuQuant */);
         nq.mapPixel(Uint8Array.from([r, g, b, a]));
         return this.success();
     }

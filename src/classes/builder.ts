@@ -3,7 +3,7 @@
 * Copyright © 2026 BotForge
 */
 
-import { Canvas, createCanvas, Image, loadImage, SKRSContext2D } from '@napi-rs/canvas';
+import { Canvas, createCanvas, Image, SKRSContext2D } from '@napi-rs/canvas';
 import {
     FillOrStroke,
     FillOrStrokeOrClear,
@@ -15,7 +15,7 @@ import {
     ColorDataType,
     PieChartOptions,
     BarData,
-    ForgeCanvasError,
+    ReForgeCanvasError,
     RectAlign,
     RectBaseline,
     TextWrap,
@@ -25,6 +25,7 @@ import {
     ImageFormat,
     ImageManager,
 } from '..';
+import { DEFAULT_POLICY, loadImageFrom } from '../structures/loader';
 import { hexToRgba, rgbaToHex } from '@gifsx/gifsx';
 
 export class CanvasBuilder {
@@ -370,7 +371,7 @@ export class CanvasBuilder {
 
         if (!(image instanceof Image))
             image = manager ? await manager.load(image)
-                : await loadImage(image);
+                : await loadImageFrom(image, DEFAULT_POLICY);
 
         width ??= srcWidth ?? image.width;
         height ??= srcHeight ?? image.height;
@@ -551,17 +552,17 @@ export class CanvasBuilder {
 
         switch (method) {
             case FilterMethod.add: {
-                if (!f || !value) throw new Error(ForgeCanvasError.NoFilterOrValue);
+                if (!f || !value) throw new Error(ReForgeCanvasError.NoFilterOrValue);
                 ctx.filter = ctx.filter !== 'none' ? ctx.filter += fstr : fstr;
                 return;
             }
             case FilterMethod.set: {
-                if (!f || !value) throw new Error(ForgeCanvasError.NoFilterOrValue);
+                if (!f || !value) throw new Error(ReForgeCanvasError.NoFilterOrValue);
                 ctx.filter = fstr;
                 return;
             }
             case FilterMethod.remove: {
-                if (!f) throw new Error(ForgeCanvasError.NoFilter);
+                if (!f) throw new Error(ReForgeCanvasError.NoFilter);
                 const filters = parseFilters(ctx.filter).filter(x => x.filter !== f);
                 ctx.filter = filters.length ? filters.map(x => x.raw).join(' ') : 'none';
                 return;
@@ -573,7 +574,7 @@ export class CanvasBuilder {
             case FilterMethod.get: return ctx.filter;
             case FilterMethod.json: return parseFilters(ctx.filter);
             case FilterMethod.setRaw: {
-                if (!value) throw new Error(ForgeCanvasError.NoFilterOrValue);
+                if (!value) throw new Error(ReForgeCanvasError.NoFilterOrValue);
                 ctx.filter = value;
                 return;
             }

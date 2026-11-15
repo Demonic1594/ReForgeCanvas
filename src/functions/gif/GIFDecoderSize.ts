@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, WidthOrHeight } from '../..';
+import { ReForgeCanvasError, WidthOrHeight } from '../..';
 
 export default new NativeFunction({
     name: '$GIFDecoderSize',
@@ -32,7 +32,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, property]) {
         const gif = ctx.gifManager?.getDecoder(name);
-        if (!gif) return this.customError(ForgeCanvasError.NoDecoder);
+        if (!gif) return this.customError(ReForgeCanvasError.NoDecoder);
 
         return this.success(property !== null // @ts-ignore
             ? gif[WidthOrHeight[

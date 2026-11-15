@@ -10,6 +10,8 @@ const forgescript_1 = require("@tryforge/forgescript");
 const node_fs_1 = require("node:fs");
 const node_path_1 = require("node:path");
 const __1 = require("..");
+const logger_1 = require("../structures/logger");
+const loader_1 = require("../structures/loader");
 class Manager {
     map;
     constructor() { this.map = new Map(); }
@@ -81,25 +83,63 @@ class GradientManager extends Manager {
 exports.GradientManager = GradientManager;
 class ImageManager extends Manager {
     loadOptions;
-    set(name, image) { this.map.set(name, image); }
-    async load(name, src) {
+    /** The loader policy this manager's loads follow (the bot's, or the strict defaults). */
+    policy;
+    /** Names stored by the automatic cache, oldest first; capped by policy.cache.maxImages. */
+    cached = new Set();
+    constructor(policy) {
+        super();
+        this.policy = policy ?? loader_1.DEFAULT_POLICY;
+    }
+    set(name, image) {
+        this.cached.delete(name);
+        this.map.set(name, image);
+    }
+    /** Stores an image the extension cached by itself (emojis, URLs, patterns); the oldest go first. */
+    cache(name, image) {
+        this.cached.delete(name);
+        this.cached.add(name);
+        this.map.set(name, image);
+        const max = this.policy.cache.maxImages;
+        for (const oldest of this.cached) {
+            if (this.cached.size <= max)
+                break;
+            this.cached.delete(oldest);
+            this.map.delete(oldest);
+        }
+    }
+    remove(name) {
+        this.cached.delete(name);
+        this.map.delete(name);
+    }
+    async load(name, src, fetchOptions) {
         if (name instanceof canvas_1.Image)
             return name;
-        const image = await (0, canvas_1.loadImage)(src ?? name, this.loadOptions);
+        if (src !== undefined && !isImageSource(src)) {
+            fetchOptions = src;
+            src = undefined;
+        }
+        const image = await (0, loader_1.loadImageFrom)(src ?? name, this.policy, this.loadOptions, fetchOptions);
         if (typeof name === 'string')
-            this.map.set(name, image);
+            this.cache(name, image);
         return image;
     }
-    async tryGet(name, src) {
-        let image = this.map.get(name);
-        if (image)
+    async tryGet(name, src, fetchOptions) {
+        const image = this.map.get(name);
+        if (image) {
+            if (logger_1.log.enabled('debug'))
+                logger_1.log.debug(`cache hit: ${/^https?:/i.test(name) ? (0, loader_1.describeUrl)(name) : name}`);
             return image;
-        image = await this.load(name, src);
-        this.map.set(name, image);
-        return image;
+        }
+        return this.load(name, src, fetchOptions ?? {});
     }
 }
 exports.ImageManager = ImageManager;
+function isImageSource(x) {
+    return typeof x === 'string' || x instanceof URL || x instanceof canvas_1.Image
+        || Buffer.isBuffer(x) || x instanceof Uint8Array || x instanceof ArrayBuffer
+        || (typeof SharedArrayBuffer !== 'undefined' && x instanceof SharedArrayBuffer);
+}
 class NeuQuantManager extends Manager {
     set(name, nq) { this.map.set(name, nq); }
 }
@@ -114,9 +154,11 @@ class ComponentManager extends Manager {
         component?.data?.name ?? component.name, component instanceof forgescript_1.ForgeFunction
             ? component : new forgescript_1.ForgeFunction(component));
     }
-    load(path, log) {
-        if (!(0, node_fs_1.existsSync)(path))
-            throw forgescript_1.Logger.error(`Component ${path} does not exist`);
+    load(path, verbose) {
+        if (!(0, node_fs_1.existsSync)(path)) {
+            logger_1.log.error(`Component ${path} does not exist`);
+            throw new Error(`${logger_1.LOG_PREFIX} Component ${path} does not exist`);
+        }
         if ((0, node_fs_1.statSync)(path).isFile()) {
             if (!path.endsWith('.js'))
                 return;
@@ -125,16 +167,17 @@ class ComponentManager extends Manager {
                 const r = require(path);
                 const component = r?.default ?? r;
                 this.set(component);
-                if (log)
-                    forgescript_1.Logger.info(`Successfully loaded component: ${component.data?.name ?? component.name}`);
+                if (verbose)
+                    logger_1.log.print(`Successfully loaded component: ${component.data?.name ?? component.name}`);
             }
             catch (error) {
-                throw forgescript_1.Logger.error(`Failed to load component ${path}: ${error}`);
+                logger_1.log.error(`Failed to load component ${path}: ${error}`);
+                throw new Error(`${logger_1.LOG_PREFIX} Failed to load component ${path}: ${error}`);
             }
         }
         else
             for (const child of (0, node_fs_1.readdirSync)(path))
-                this.load((0, node_path_1.join)(path, child), log);
+                this.load((0, node_path_1.join)(path, child), verbose);
     }
 }
 exports.ComponentManager = ComponentManager;

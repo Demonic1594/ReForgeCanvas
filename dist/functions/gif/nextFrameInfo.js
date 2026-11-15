@@ -30,7 +30,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, f]) {
         const gif = ctx.gifManager?.getDecoder(name);
         if (!gif)
-            return this.customError("No GIF decoder with provided name found" /* ForgeCanvasError.NoDecoder */);
+            return this.customError("No GIF decoder with provided name found" /* ReForgeCanvasError.NoDecoder */);
         const frame = gif.nextFrameInfo();
         if (frame) {
             ctx.gifManager?.setFrame(f, frame);

@@ -37,7 +37,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, x, y]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         canvas.ctx.translate(x, y);
         return this.success();
     }

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$getTransform',
@@ -23,7 +23,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         const { a,b,c,d,e,f } = canvas.ctx.getTransform();
         return this.success(JSON.stringify([a,b,c,d,e,f]));
