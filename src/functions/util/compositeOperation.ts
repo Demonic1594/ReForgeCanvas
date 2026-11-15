@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { CompositingOperation, ForgeCanvasError } from '../..';
+import { CompositingOperation, ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$compositeOperation',
@@ -32,7 +32,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, operation]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         return this.success(operation !== null
             ? (canvas.globalCompositeOperation = (typeof operation === 'number' 

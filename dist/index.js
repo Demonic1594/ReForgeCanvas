@@ -43,6 +43,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReForgeCanvas = exports.version = void 0;
 const forgescript_1 = require("@tryforge/forgescript");
 const classes_1 = require("./classes");
+const node_path_1 = require("node:path");
 const loader_1 = require("./structures/loader");
 const logger_1 = require("./structures/logger");
 const pkg = __importStar(require("../package.json"));
@@ -81,7 +82,8 @@ class ReForgeCanvas extends forgescript_1.ForgeExtension {
         (0, loader_1.setPolicy)(client, this.policy);
         this.load(__dirname + '/functions');
         client.preloadImages = new classes_1.ImageManager(this.policy);
-        logger_1.log.debug(`started: network ${this.policy.network.enabled ? 'on' : 'off'}, files.read ${f.read ?? 'off'}, files.write ${f.write ?? 'off'}`);
+        const n = this.policy.network, folder = (dir, guarded) => guarded ? 'bot folder (guarded)' : dir ? ((0, node_path_1.isAbsolute)((0, loader_1.describePath)(dir)) ? (0, loader_1.describePath)(dir) : `./${(0, loader_1.describePath)(dir)}`) : 'off';
+        logger_1.log.info(`${this.version} started: network ${n.enabled ? `on (${n.timeout} ms, ${n.maxBytes} bytes, ${n.maxRedirects} redirects${n.allowedHosts.length ? `, ${n.allowedHosts.length} allowed host(s)` : ''}${n.allowPrivateNetwork ? ', private network allowed' : n.privateAddresses.length ? `, ${n.privateAddresses.length} private address(es) allowed` : ''})` : 'off'}, files.read ${folder(f.read, f.readGuarded)}, files.write ${folder(f.write, f.writeGuarded)}, log level ${this.policy.logLevel}`);
     }
     static components = new classes_1.ComponentManager();
 }

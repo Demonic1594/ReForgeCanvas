@@ -54,7 +54,7 @@ exports.default = new forgescript_1.NativeFunction({
             animation = canvas_1.LottieAnimation.loadFromData(d, base ? { resourcePath: base } : undefined);
         }
         catch (e) {
-            return (0, __1.loaderFailure)(this, e, "Failed to load the Lottie animation" /* ForgeCanvasError.LottieFail */);
+            return (0, __1.loaderFailure)(this, e, "Failed to load the Lottie animation" /* ReForgeCanvasError.LottieFail */);
         }
         ctx.lottieManager.set(name, animation);
         return this.success();

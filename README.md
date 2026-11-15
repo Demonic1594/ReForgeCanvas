@@ -89,7 +89,19 @@ Every option is optional. Each `ForgeClient` gets its own `ReForgeCanvas` instan
 | `limits.maxImagePixels` | `25000000` | Largest image decoded, read from the PNG, JPEG, GIF, WebP, BMP, AVIF or SVG header before decoding. |
 | `limits.maxGifFrames` / `limits.maxGifPixels` | `300` / `100000000` | Frames one GIF encoder may hold, and all their pixels together (200 frames of 1000x1000 took 1.7 GB and 5 s in 1.3.1). |
 | `limits.maxEmojisPerText` | `50` | Emoji images one `$drawText` loads; the rest stay text. Each emoji is a request to Discord's CDN. |
-| `logLevel` | `REFORGECANVAS_LOG_LEVEL`, else `warn` | `silent`, `error`, `warn`, `info`, `debug` or `trace`. `debug` shows each load (host and path, bytes, ms) and cache hits; query strings, tokens and file contents are never printed. One level for the whole process (the last ReForgeCanvas created sets it). |
+| `logLevel` | `REFORGECANVAS_LOG_LEVEL`, else `info` (as in the other ReForge extensions) | `silent`, `error`, `warn`, `info`, `debug` or `trace` (see the table below). `debug` shows each load (host and path, bytes, ms) and cache hits; query strings, tokens and file contents are never printed. One level for the whole process (the last ReForgeCanvas created sets it). |
+
+What each level prints (every line starts with `[ReForgeCanvas]`; a level also prints everything above it):
+
+| Level | What | Example |
+|---|---|---|
+| `error` | a component file that does not exist or fails to load | `Component ./card.json does not exist` |
+| `warn` | a refused or failed load, one line with the reason (the user only sees the generic error); a font name registered twice; the one-time `files: true` notice | `$drawImage: NOT_ALLOWED 169.254.169.254 is a non-public address` |
+| `info` (default) | one line at start-up with the settings in force; fonts and components when you ask for them (`registerFonts(fonts, true)`, `components.load(path, true)`) | `2.0.0 started: network on (10000 ms, 10485760 bytes, 5 redirects), files.read ./assets, files.write off, log level info` |
+| `debug` | each load (host and path, bytes, ms), each file read or written, each cache hit | `fetched https://cdn.example.org/bg.png: 48213 bytes in 112 ms` |
+| `trace` | the same as `debug` for now | |
+
+A command that loads images successfully prints nothing at the default level. Query strings, tokens and file contents are never printed at any level.
 
 A wrong option (a negative number, `files.read: 5`, an unknown `logLevel`) throws from `new ReForgeCanvas(...)`, so the bot does not start with a broken setup.
 
@@ -148,14 +160,14 @@ The risk depends on whether your bot passes **user text** to these functions, fo
 | `$loadImageOptions` request options | passed as is | only `headers` | none |
 | A failed image in `$drawImage` | a black rectangle, no error | an error | none (colours, `gradient://` and `pattern://` still draw as styles) |
 | Error text | the library's message | a generic message, detail in the log | read the log |
-| The package and class | `@tryforge/forge.canvas`, `ForgeCanvas` | `@tryforge/reforge.canvas`, `ReForgeCanvas` | see below |
+| The package, class and error enum | `@tryforge/forge.canvas`, `ForgeCanvas`, `ForgeCanvasError` | `@tryforge/reforge.canvas`, `ReForgeCanvas`, `ReForgeCanvasError` (no alias for the old names) | see below |
 
 Unchanged: data URIs, inline `<svg>` (checked: @napi-rs/canvas 1.1.1 does not fetch what an SVG links to), `images://`, `preload://`, `canvas://`, `frame://`, `rgba://`, `hex://`, every drawing function, GIF encoding and components.
 
 <h3 align="center">Switching from ForgeCanvas</h3><hr>
 
 1. `npm uninstall @tryforge/forge.canvas` and `npm i github:Demonic1594/ReForgeCanvas#v2.0.0`.
-2. Change the require: `const { ReForgeCanvas } = require("@tryforge/reforge.canvas")`, and `new ForgeCanvas()` to `new ReForgeCanvas({ ... })`. `ForgeCanvas` is no longer exported; `ForgeCanvas.components` is now `ReForgeCanvas.components`.
+2. Change the require: `const { ReForgeCanvas } = require("@tryforge/reforge.canvas")`, and `new ForgeCanvas()` to `new ReForgeCanvas({ ... })`. `ForgeCanvas` is not exported (there is no alias), so code that does `new ForgeCanvas()` must change to `new ReForgeCanvas()`, and its import to `@tryforge/reforge.canvas`. `ForgeCanvas.components` is now `ReForgeCanvas.components`, and TypeScript code that imports the `ForgeCanvasError` enum uses `ReForgeCanvasError`.
 3. If your commands draw local files, set `files.read` (a folder, or `true` for the bot folder with guards); if they save files, set `files.write`. Without it, each refused path is logged with the option to set.
 4. Commands stay the same. The extension registers as `reforge.canvas`, and its log lines start with `[ReForgeCanvas]`.
 

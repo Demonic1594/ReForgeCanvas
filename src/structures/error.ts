@@ -3,7 +3,7 @@
 * Copyright © 2026 BotForge
 */
 
-export const enum ForgeCanvasError {
+export const enum ReForgeCanvasError {
     EmptyName               = 'The name argument cannot be empty',
     
     NoCanvas                = 'No canvas with provided name found',

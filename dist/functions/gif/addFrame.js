@@ -46,7 +46,7 @@ exports.default = new forgescript_1.NativeFunction({
     async execute(ctx, [name, frame, options, speed]) {
         const gif = ctx.gifManager?.getEncoderOrCurrent(name);
         if (!gif)
-            return this.customError("No GIF encoder with provided name found" /* ForgeCanvasError.NoEncoder */);
+            return this.customError("No GIF encoder with provided name found" /* ReForgeCanvasError.NoEncoder */);
         const f = await (0, __1.resolveFrame)(this, ctx, frame, speed);
         if (f instanceof forgescript_1.Return)
             return f;
@@ -73,7 +73,7 @@ exports.default = new forgescript_1.NativeFunction({
             (0, __1.countGifFrame)(gif, f.width * f.height, (0, __1.policyOf)(ctx.client));
         }
         catch (e) {
-            return (0, __1.loaderFailure)(this, e, "This GIF is too large" /* ForgeCanvasError.GIFTooLarge */, "This GIF is too large" /* ForgeCanvasError.GIFTooLarge */);
+            return (0, __1.loaderFailure)(this, e, "This GIF is too large" /* ReForgeCanvasError.GIFTooLarge */, "This GIF is too large" /* ReForgeCanvasError.GIFTooLarge */);
         }
         gif.addFrame(f);
         return this.success();

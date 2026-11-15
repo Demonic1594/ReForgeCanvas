@@ -10,7 +10,7 @@ import { Frame, rgbaToHex, hexToRgba, indexedToRgba } from '@gifsx/gifsx';
 import { join, basename } from 'node:path';
 import { promises as fsp } from 'node:fs';
 
-import { ForgeCanvasError, CanvasBuilder, Spans, ImageFormat, ImageManager } from '..';
+import { ReForgeCanvasError, CanvasBuilder, Spans, ImageFormat, ImageManager } from '..';
 import {
     LoaderError, LoaderPolicy, OWNER_POLICY, DEFAULT_POLICY, ImageSource,
     describeUrl, fetchBytes, loadImageFrom, policyOf, readLocal, resolveReadPath, sourceKind
@@ -145,12 +145,12 @@ export function imageManagerOf(ctx: Context) {
  * Logs why a load failed (with the detail) and returns a generic error for the user.
  * Refusals say only that the source is not allowed or too large; never the address, path or library text.
  */
-export function loaderFailure(self: CompiledFunction, err: unknown, generic: ForgeCanvasError | string = ForgeCanvasError.ImageFail, tooLarge: ForgeCanvasError | string = ForgeCanvasError.SourceTooLarge) {
+export function loaderFailure(self: CompiledFunction, err: unknown, generic: ReForgeCanvasError | string = ReForgeCanvasError.ImageFail, tooLarge: ReForgeCanvasError | string = ReForgeCanvasError.SourceTooLarge) {
     const code = err instanceof LoaderError ? err.code : 'FAILED';
     const detail = err instanceof Error ? err.message : String(err);
     clog.warn(`${self?.data?.name ?? 'load'}: ${code} ${detail}`);
     return self.customError(
-        code === 'NOT_ALLOWED' ? ForgeCanvasError.SourceNotAllowed
+        code === 'NOT_ALLOWED' ? ReForgeCanvasError.SourceNotAllowed
             : code === 'TOO_LARGE' ? tooLarge
                 : generic
     );
@@ -163,12 +163,12 @@ export function isStyleSource(src: string) {
 
 export function validateFont(font: string) {
     const match = fontRegex.exec(font);
-    if (!match?.[0]) return ForgeCanvasError.InvalidFontFormat;
+    if (!match?.[0]) return ReForgeCanvasError.InvalidFontFormat;
 
     const families = match[6].split(',').map(x => x?.trim());
     for (const family of families)
         if (!GlobalFonts.has(family.replace(/['',]/g, '')))
-            return `${ForgeCanvasError.InvalidFont} (${family})`;
+            return `${ReForgeCanvasError.InvalidFont} (${family})`;
     return match;
 }
 
@@ -191,7 +191,7 @@ export async function resolveStyle(self: CompiledFunction, ctx: Context, canvas:
 
     if (s[0] === 'gradient') {
         const gradient = ctx.gradientManager?.get(args);
-        if (!gradient) return self.customError(ForgeCanvasError.NoGradient);
+        if (!gradient) return self.customError(ReForgeCanvasError.NoGradient);
         return gradient;
     }
 
@@ -222,7 +222,7 @@ export async function resolveStyle(self: CompiledFunction, ctx: Context, canvas:
 
         if (type === 'canvas') {
             const canvas_2 = ctx.canvasManager?.get(repeat ? splits.join(':') : splits.join());
-            if (!canvas_2) return self.customError(ForgeCanvasError.NoCanvas);
+            if (!canvas_2) return self.customError(ReForgeCanvasError.NoCanvas);
 
             image = canvas_2.ctx.canvas;
         } else if (type === 'images' && splits[0]?.startsWith('//')) {
@@ -231,7 +231,7 @@ export async function resolveStyle(self: CompiledFunction, ctx: Context, canvas:
             const img = (meow ? ctx.client.preloadImages : ctx.imageManager)
                 ?.get(meow ? source.slice(10) : source);
 
-            if (!img) return self.customError(ForgeCanvasError.NoImage);
+            if (!img) return self.customError(ReForgeCanvasError.NoImage);
 
             image = img;
         } else {
@@ -248,7 +248,7 @@ export async function resolveStyle(self: CompiledFunction, ctx: Context, canvas:
         }
 
         const pattern = canvas.ctx.createPattern(image, repeat as any);
-        if (!pattern) return self.customError(ForgeCanvasError.ImageFail);
+        if (!pattern) return self.customError(ReForgeCanvasError.ImageFail);
         if (x !== undefined && y !== undefined)
             pattern.setTransform(new DOMMatrix().translate(x, y));
         return pattern;
@@ -295,7 +295,7 @@ export async function resolveImage(self: CompiledFunction, ctx: Context, src: st
         }
         case 'frame': {
             const frame = ctx.gifManager?.getFrame(src.slice(8));
-            if (!frame) return self.customError(ForgeCanvasError.NoFrame);
+            if (!frame) return self.customError(ReForgeCanvasError.NoFrame);
 
             const { width, height, buffer } = frame;
             const rgba = buffer.length === width * height * 4;
@@ -317,21 +317,21 @@ export async function resolveImage(self: CompiledFunction, ctx: Context, src: st
         }
         case 'preload': {
             const image = ctx.client.preloadImages?.get(splitted.slice(1).join('//'));
-            if (!image) return self.customError(ForgeCanvasError.NoImage);
+            if (!image) return self.customError(ReForgeCanvasError.NoImage);
 
             img = image;
             break;
         }
         case 'images': {
             const image = ctx.imageManager?.get(splitted.slice(1).join('//'));
-            if (!image) return self.customError(ForgeCanvasError.NoImage);
+            if (!image) return self.customError(ReForgeCanvasError.NoImage);
 
             img = image;
             break;
         }
         case 'canvas': {
             const canvas = ctx.canvasManager?.get(splitted.slice(1).join('//'));
-            if (!canvas) return self.customError(ForgeCanvasError.NoCanvas);
+            if (!canvas) return self.customError(ReForgeCanvasError.NoCanvas);
 
             img = await canvas.encode(ImageFormat.png);
             break;
@@ -405,13 +405,13 @@ export async function resolveFrame(self: CompiledFunction, ctx: Context, frame: 
             const img = (meow ? ctx.client.preloadImages : ctx.imageManager)
                 ?.get(meow ? source.slice(10) : source);
 
-            if (!img) return self.customError(ForgeCanvasError.NoImage);
+            if (!img) return self.customError(ReForgeCanvasError.NoImage);
             return await loadFrame(imageManagerOf(ctx), img, speed);
         }
 
         case 'canvas': {
             const canvas = ctx.canvasManager?.get(frame.slice(9));
-            if (!canvas) return self.customError(ForgeCanvasError.NoCanvas);
+            if (!canvas) return self.customError(ReForgeCanvasError.NoCanvas);
             return Frame.fromRgba(
                 canvas.width, canvas.height,
                 Uint8Array.from(canvas.inner.data()),
@@ -421,7 +421,7 @@ export async function resolveFrame(self: CompiledFunction, ctx: Context, frame: 
 
         default: try {
             return await loadFrame(imageManagerOf(ctx), frame, speed);
-        } catch (e) { return loaderFailure(self, e, ForgeCanvasError.FrameFail) }
+        } catch (e) { return loaderFailure(self, e, ReForgeCanvasError.FrameFail) }
     }
 }
 

@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { loadImage } from '@napi-rs/canvas';
 
-import { imageManagerOf, ImageFormat, ForgeCanvasError, loaderFailure, policyOf, writeLocal } from '../..';
+import { imageManagerOf, ImageFormat, ReForgeCanvasError, loaderFailure, policyOf, writeLocal } from '../..';
 
 export default new NativeFunction({
     name: '$saveCanvas',
@@ -42,8 +42,8 @@ export default new NativeFunction({
     async execute (ctx, [name, path, f]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
-        if (!path) return this.customError(ForgeCanvasError.NoPath);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
+        if (!path) return this.customError(ReForgeCanvasError.NoPath);
 
         // CanvasBuilder.encode takes the format name ('png'), not a MIME type ('image/png' threw in 1.3.1)
         const format: any = (typeof f === 'number' ? ImageFormat[f] : f) ?? 'png';
@@ -55,7 +55,7 @@ export default new NativeFunction({
             );
         } else try {
             await writeLocal(path, await canvas.encode(format), policyOf(ctx.client));
-        } catch (e) { return loaderFailure(this, e, ForgeCanvasError.WriteFail) }
+        } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.WriteFail) }
         return this.success();
     }
 });

@@ -5,7 +5,7 @@
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$GIFEncoderGlobalPalette',
@@ -25,7 +25,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name]) {
         const gif = ctx.gifManager?.getEncoderOrCurrent(name);
-        if (!gif) return this.customError(ForgeCanvasError.NoEncoder);
+        if (!gif) return this.customError(ReForgeCanvasError.NoEncoder);
         
         return this.success(gif.palette !== null 
             ? `[${Array.from(gif.palette).join(', ')}]` : null

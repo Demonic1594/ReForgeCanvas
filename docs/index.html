@@ -150,15 +150,53 @@ The compiled code (<code>dist/</code>) and <code>metadata/</code> are committed,
 </tr>
 <tr>
 <td><code>logLevel</code></td>
-<td><code>REFORGECANVAS_LOG_LEVEL</code>, else <code>warn</code></td>
-<td><code>silent</code>, <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug</code> or <code>trace</code>. <code>debug</code> shows each load (host and path, bytes, ms) and cache hits; query strings, tokens and file contents are never printed. One level for the whole process (the last ReForgeCanvas created sets it).</td>
+<td><code>REFORGECANVAS_LOG_LEVEL</code>, else <code>info</code> (as in the other ReForge extensions)</td>
+<td><code>silent</code>, <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug</code> or <code>trace</code> (see the table below). <code>debug</code> shows each load (host and path, bytes, ms) and cache hits; query strings, tokens and file contents are never printed. One level for the whole process (the last ReForgeCanvas created sets it).</td>
 </tr>
 </tbody>
 </table>
+<p>What each level prints (every line starts with <code>[ReForgeCanvas]</code>; a level also prints everything above it):</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>What</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>error</code></td>
+<td>a component file that does not exist or fails to load</td>
+<td><code>Component ./card.json does not exist</code></td>
+</tr>
+<tr>
+<td><code>warn</code></td>
+<td>a refused or failed load, one line with the reason (the user only sees the generic error); a font name registered twice; the one-time <code>files: true</code> notice</td>
+<td><code>$drawImage: NOT_ALLOWED 169.254.169.254 is a non-public address</code></td>
+</tr>
+<tr>
+<td><code>info</code> (default)</td>
+<td>one line at start-up with the settings in force; fonts and components when you ask for them (<code>registerFonts(fonts, true)</code>, <code>components.load(path, true)</code>)</td>
+<td><code>2.0.0 started: network on (10000 ms, 10485760 bytes, 5 redirects), files.read ./assets, files.write off, log level info</code></td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td>each load (host and path, bytes, ms), each file read or written, each cache hit</td>
+<td><code>fetched https://cdn.example.org/bg.png: 48213 bytes in 112 ms</code></td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td>the same as <code>debug</code> for now</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>A command that loads images successfully prints nothing at the default level. Query strings, tokens and file contents are never printed at any level.</p>
 <p>A wrong option (a negative number, <code>files.read: 5</code>, an unknown <code>logLevel</code>) throws from <code>new ReForgeCanvas(...)</code>, so the bot does not start with a broken setup.</p>
 <p><code>registerFonts()</code> called from your own JavaScript (at start-up) trusts you: it reads local paths anywhere, as before, with the network limits. Pass a policy as the third argument to change that: <code>registerFonts(fonts, true, resolvePolicy({ ... }))</code>.</p>
 <h3 align="center">What changed compared to ForgeCanvas</h3><hr>
-<p>Each row was checked in ForgeCanvas 1.3.1's source (and in @napi-rs/canvas 1.1.1 and undici 7.30, which it uses), reproduced on the 1.3.1 build, and has a test in <code>test/</code>. The tests boot a real ForgeScript client (never logged in) and run ForgeScript code through its own compiler and interpreter. Run against the 1.3.1 build, 44 of the 55 tests that apply fail there; the 11 that pass check kept behaviour (see <code>CHANGELOG.md</code>).</p>
+<p>Each row was checked in ForgeCanvas 1.3.1's source (and in @napi-rs/canvas 1.1.1 and undici 7.30, which it uses), reproduced on the 1.3.1 build, and has a test in <code>test/</code>. The tests boot a real ForgeScript client (never logged in) and run ForgeScript code through its own compiler and interpreter. Run against the 1.3.1 build, 54 of the 67 tests that apply fail there (8 of them because the bot process aborts); the 13 that pass check kept behaviour (see <code>CHANGELOG.md</code>).</p>
 <table>
 <thead>
 <tr>
@@ -402,9 +440,9 @@ The compiled code (<code>dist/</code>) and <code>metadata/</code> are committed,
 <td>read the log</td>
 </tr>
 <tr>
-<td>The package and class</td>
-<td><code>@tryforge/forge.canvas</code>, <code>ForgeCanvas</code></td>
-<td><code>@tryforge/reforge.canvas</code>, <code>ReForgeCanvas</code></td>
+<td>The package, class and error enum</td>
+<td><code>@tryforge/forge.canvas</code>, <code>ForgeCanvas</code>, <code>ForgeCanvasError</code></td>
+<td><code>@tryforge/reforge.canvas</code>, <code>ReForgeCanvas</code>, <code>ReForgeCanvasError</code> (no alias for the old names)</td>
 <td>see below</td>
 </tr>
 </tbody>
@@ -413,7 +451,7 @@ The compiled code (<code>dist/</code>) and <code>metadata/</code> are committed,
 <h3 align="center">Switching from ForgeCanvas</h3><hr>
 <ol>
 <li><code>npm uninstall @tryforge/forge.canvas</code> and <code>npm i github:Demonic1594/ReForgeCanvas#v2.0.0</code>.</li>
-<li>Change the require: <code>const { ReForgeCanvas } = require(&quot;@tryforge/reforge.canvas&quot;)</code>, and <code>new ForgeCanvas()</code> to <code>new ReForgeCanvas({ ... })</code>. <code>ForgeCanvas</code> is no longer exported; <code>ForgeCanvas.components</code> is now <code>ReForgeCanvas.components</code>.</li>
+<li>Change the require: <code>const { ReForgeCanvas } = require(&quot;@tryforge/reforge.canvas&quot;)</code>, and <code>new ForgeCanvas()</code> to <code>new ReForgeCanvas({ ... })</code>. <code>ForgeCanvas</code> is not exported (there is no alias), so code that does <code>new ForgeCanvas()</code> must change to <code>new ReForgeCanvas()</code>, and its import to <code>@tryforge/reforge.canvas</code>. <code>ForgeCanvas.components</code> is now <code>ReForgeCanvas.components</code>, and TypeScript code that imports the <code>ForgeCanvasError</code> enum uses <code>ReForgeCanvasError</code>.</li>
 <li>If your commands draw local files, set <code>files.read</code> (a folder, or <code>true</code> for the bot folder with guards); if they save files, set <code>files.write</code>. Without it, each refused path is logged with the option to set.</li>
 <li>Commands stay the same. The extension registers as <code>reforge.canvas</code>, and its log lines start with <code>[ReForgeCanvas]</code>.</li>
 </ol>

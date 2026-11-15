@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, LottieOption } from '../..';
+import { ReForgeCanvasError, LottieOption } from '../..';
 
 export default new NativeFunction({
     name: '$lottieOption',
@@ -32,7 +32,7 @@ export default new NativeFunction({
     ],
     execute(ctx, [name, option]) {
         const lottie = ctx.lottieManager?.get(name);
-        if (!lottie) return this.customError(ForgeCanvasError.NoLottie);
+        if (!lottie) return this.customError(ReForgeCanvasError.NoLottie);
 
         // @ts-expect-error
         return this.success(lottie[

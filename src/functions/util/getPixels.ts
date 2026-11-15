@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ColorDataType, ForgeCanvasError } from '../..';
+import { ColorDataType, ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$getPixels',
@@ -60,7 +60,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, x, y, w, h, t]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
         
         return this.success(
             `[${canvas.getPixels(x, y, w, h, t)

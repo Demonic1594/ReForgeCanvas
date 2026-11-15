@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
-import { BarData, BarOptions, ForgeCanvasError, resolveStyle } from '../..';
+import { BarData, BarOptions, ReForgeCanvasError, resolveStyle } from '../..';
 
 export default new NativeFunction({
     name: '$drawProgressBar',
@@ -58,7 +58,7 @@ export default new NativeFunction({
     ],
     async execute(ctx, [name, x, y, width, height]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         const data: BarData[] = (ctx.getEnvironmentKey('progressBarData') ?? []) as BarData[];
         const options = (ctx.getEnvironmentKey('progressBarOptions') ?? {}) as BarOptions;
@@ -73,7 +73,7 @@ export default new NativeFunction({
         let res: any;
         if (type === 'normal') {
             const progress = data[0];
-            if (!progress) return this.customError(ForgeCanvasError.NoBarData);
+            if (!progress) return this.customError(ReForgeCanvasError.NoBarData);
 
             const style = await resolveStyle(
                 this, ctx, canvas,

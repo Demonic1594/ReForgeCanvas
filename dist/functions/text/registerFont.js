@@ -42,7 +42,7 @@ exports.default = new forgescript_1.NativeFunction({
         }
         catch (e) {
             if (e instanceof __1.LoaderError)
-                return (0, __1.loaderFailure)(this, e, "Failed to register the font" /* ForgeCanvasError.FontFail */);
+                return (0, __1.loaderFailure)(this, e, "Failed to register the font" /* ReForgeCanvasError.FontFail */);
             return this.customError(e?.message ?? String(e));
         }
     }

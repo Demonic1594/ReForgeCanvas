@@ -142,7 +142,7 @@ export function resolvePolicy(options: IReForgeCanvasOptions = {}): LoaderPolicy
     const write = folder(f.write, 'files.write');
     const hosts = (n.allowedHosts ?? []).map(normaliseHost).filter(Boolean);
     return Object.freeze({
-        logLevel: options.logLevel ?? envLogLevel() ?? 'warn',
+        logLevel: options.logLevel ?? envLogLevel() ?? 'info',
         network: Object.freeze({
             enabled: n.enabled ?? true,
             timeout: num(n.timeout, 10_000, 'network.timeout', 1),

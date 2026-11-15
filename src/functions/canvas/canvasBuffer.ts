@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, ImageFormat } from '../..';
+import { ReForgeCanvasError, ImageFormat } from '../..';
 
 export default new NativeFunction({
     name: '$canvasBuffer',
@@ -39,7 +39,7 @@ export default new NativeFunction({
     ],
     async execute (ctx, [name, vname, f]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         ctx.setEnvironmentKey(vname, await canvas.encode(f));
         return this.success();

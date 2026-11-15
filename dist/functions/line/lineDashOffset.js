@@ -30,7 +30,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, offset]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         return this.success(offset
             ? (canvas.lineDashOffset = offset, undefined)
             : canvas.lineDashOffset);

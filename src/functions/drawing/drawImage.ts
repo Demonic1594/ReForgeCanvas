@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
-import { FillOrStrokeOrClear, ForgeCanvasError, imageManagerOf, isStyleSource, resolveImage, resolveStyle } from '../..';
+import { FillOrStrokeOrClear, ReForgeCanvasError, imageManagerOf, isStyleSource, resolveImage, resolveStyle } from '../..';
 
 export default new NativeFunction({
     name: '$drawImage',
@@ -68,7 +68,7 @@ export default new NativeFunction({
         const manager = imageManagerOf(ctx);
         
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         width = num(width);
         height = num(height);

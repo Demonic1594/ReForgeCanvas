@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, loaderFailure, policyOf, writeLocal } from '../..';
+import { ReForgeCanvasError, loaderFailure, policyOf, writeLocal } from '../..';
 
 export default new NativeFunction({
     name: '$saveEncoder',
@@ -40,12 +40,12 @@ export default new NativeFunction({
     async execute (ctx, [name, path]) {
         const gif = ctx.gifManager?.getEncoderOrCurrent(name);
 
-        if (!gif) return this.customError(ForgeCanvasError.NoEncoder);
-        if (!path) return this.customError(ForgeCanvasError.NoPath);
+        if (!gif) return this.customError(ReForgeCanvasError.NoEncoder);
+        if (!path) return this.customError(ReForgeCanvasError.NoPath);
 
         try {
             await writeLocal(path, gif.getBuffer(), policyOf(ctx.client));
-        } catch (e) { return loaderFailure(this, e, ForgeCanvasError.WriteFail) }
+        } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.WriteFail) }
         return this.success();
     }
 });

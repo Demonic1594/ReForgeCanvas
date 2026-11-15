@@ -59,10 +59,10 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, canvas, x, y, width, height]) {
         const lottie = ctx.lottieManager?.get(name);
         if (!lottie)
-            return this.customError("No Lottie animation with provided name found" /* ForgeCanvasError.NoLottie */);
+            return this.customError("No Lottie animation with provided name found" /* ReForgeCanvasError.NoLottie */);
         const context = ctx.canvasManager?.get(canvas)?.ctx;
         if (!context)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         lottie.render(context, // @ts-expect-error
         x !== null && typeof x !== 'string'
             ? { x, y, width, height } : undefined);

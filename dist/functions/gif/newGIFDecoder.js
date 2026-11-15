@@ -44,18 +44,18 @@ exports.default = new forgescript_1.NativeFunction({
         if (path.startsWith('encoder://')) {
             const encoder = manager.getEncoder(path.slice(10));
             if (!encoder)
-                return this.customError("No GIF encoder with provided name found" /* ForgeCanvasError.NoEncoder */);
+                return this.customError("No GIF encoder with provided name found" /* ReForgeCanvasError.NoEncoder */);
             gif = encoder.getBuffer();
         }
         else
             try {
                 const data = await (0, __1.loadSource)(path, (0, __1.policyOf)(ctx.client));
                 if (typeof data === 'string')
-                    return this.customError("Failed to load the GIF" /* ForgeCanvasError.GIFFail */); // data: URLs were never supported here
+                    return this.customError("Failed to load the GIF" /* ReForgeCanvasError.GIFFail */); // data: URLs were never supported here
                 gif = data;
             }
             catch (e) {
-                return (0, __1.loaderFailure)(this, e, "Failed to load the GIF" /* ForgeCanvasError.GIFFail */);
+                return (0, __1.loaderFailure)(this, e, "Failed to load the GIF" /* ReForgeCanvasError.GIFFail */);
             }
         try {
             const size = (0, __1.imageDimensions)(Buffer.from(gif.buffer, gif.byteOffset, gif.byteLength));
@@ -65,7 +65,7 @@ exports.default = new forgescript_1.NativeFunction({
             manager.setDecoder(name, new gifsx_1.Decoder(new Uint8Array(gif), options ? manager.getDecodeOptions(options) : undefined));
         }
         catch (e) {
-            return (0, __1.loaderFailure)(this, e, "Failed to load the GIF" /* ForgeCanvasError.GIFFail */);
+            return (0, __1.loaderFailure)(this, e, "Failed to load the GIF" /* ReForgeCanvasError.GIFFail */);
         }
         return this.success();
     }

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, LoaderError, loaderFailure, policyOf, registerFonts } from '../..';
+import { ReForgeCanvasError, LoaderError, loaderFailure, policyOf, registerFonts } from '../..';
 
 export default new NativeFunction({
     name: '$registerFont',
@@ -44,7 +44,7 @@ export default new NativeFunction({
                 policyOf(ctx.client)
             ));
         } catch(e: any) {
-            if (e instanceof LoaderError) return loaderFailure(this, e, ForgeCanvasError.FontFail);
+            if (e instanceof LoaderError) return loaderFailure(this, e, ReForgeCanvasError.FontFail);
             return this.customError(e?.message ?? String(e));
         }
     }

@@ -141,11 +141,11 @@ function imageManagerOf(ctx) {
  * Logs why a load failed (with the detail) and returns a generic error for the user.
  * Refusals say only that the source is not allowed or too large; never the address, path or library text.
  */
-function loaderFailure(self, err, generic = "Failed to load an image" /* ForgeCanvasError.ImageFail */, tooLarge = "This source is too large" /* ForgeCanvasError.SourceTooLarge */) {
+function loaderFailure(self, err, generic = "Failed to load an image" /* ReForgeCanvasError.ImageFail */, tooLarge = "This source is too large" /* ReForgeCanvasError.SourceTooLarge */) {
     const code = err instanceof loader_1.LoaderError ? err.code : 'FAILED';
     const detail = err instanceof Error ? err.message : String(err);
     logger_1.log.warn(`${self?.data?.name ?? 'load'}: ${code} ${detail}`);
-    return self.customError(code === 'NOT_ALLOWED' ? "This source is not allowed" /* ForgeCanvasError.SourceNotAllowed */
+    return self.customError(code === 'NOT_ALLOWED' ? "This source is not allowed" /* ReForgeCanvasError.SourceNotAllowed */
         : code === 'TOO_LARGE' ? tooLarge
             : generic);
 }
@@ -156,11 +156,11 @@ function isStyleSource(src) {
 function validateFont(font) {
     const match = exports.fontRegex.exec(font);
     if (!match?.[0])
-        return "Invalid font format provided" /* ForgeCanvasError.InvalidFontFormat */;
+        return "Invalid font format provided" /* ReForgeCanvasError.InvalidFontFormat */;
     const families = match[6].split(',').map(x => x?.trim());
     for (const family of families)
         if (!canvas_1.GlobalFonts.has(family.replace(/['',]/g, '')))
-            return `${"Provided font does not exist" /* ForgeCanvasError.InvalidFont */} (${family})`;
+            return `${"Provided font does not exist" /* ReForgeCanvasError.InvalidFont */} (${family})`;
     return match;
 }
 function parseFilters(str) {
@@ -180,7 +180,7 @@ async function resolveStyle(self, ctx, canvas, style) {
     if (s[0] === 'gradient') {
         const gradient = ctx.gradientManager?.get(args);
         if (!gradient)
-            return self.customError("No gradient with provided name found" /* ForgeCanvasError.NoGradient */);
+            return self.customError("No gradient with provided name found" /* ReForgeCanvasError.NoGradient */);
         return gradient;
     }
     if (s[0] === 'pattern') {
@@ -206,7 +206,7 @@ async function resolveStyle(self, ctx, canvas, style) {
         if (type === 'canvas') {
             const canvas_2 = ctx.canvasManager?.get(repeat ? splits.join(':') : splits.join());
             if (!canvas_2)
-                return self.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+                return self.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
             image = canvas_2.ctx.canvas;
         }
         else if (type === 'images' && splits[0]?.startsWith('//')) {
@@ -215,7 +215,7 @@ async function resolveStyle(self, ctx, canvas, style) {
             const img = (meow ? ctx.client.preloadImages : ctx.imageManager)
                 ?.get(meow ? source.slice(10) : source);
             if (!img)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
             image = img;
         }
         else {
@@ -231,7 +231,7 @@ async function resolveStyle(self, ctx, canvas, style) {
         }
         const pattern = canvas.ctx.createPattern(image, repeat);
         if (!pattern)
-            return self.customError("Failed to load an image" /* ForgeCanvasError.ImageFail */);
+            return self.customError("Failed to load an image" /* ReForgeCanvasError.ImageFail */);
         if (x !== undefined && y !== undefined)
             pattern.setTransform(new DOMMatrix().translate(x, y));
         return pattern;
@@ -269,7 +269,7 @@ async function resolveImage(self, ctx, src) {
         case 'frame': {
             const frame = ctx.gifManager?.getFrame(src.slice(8));
             if (!frame)
-                return self.customError("No frame with provided name found" /* ForgeCanvasError.NoFrame */);
+                return self.customError("No frame with provided name found" /* ReForgeCanvasError.NoFrame */);
             const { width, height, buffer } = frame;
             const rgba = buffer.length === width * height * 4;
             const palette = rgba ? null : new Uint8Array(frame.palette ?? []);
@@ -287,21 +287,21 @@ async function resolveImage(self, ctx, src) {
         case 'preload': {
             const image = ctx.client.preloadImages?.get(splitted.slice(1).join('//'));
             if (!image)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
             img = image;
             break;
         }
         case 'images': {
             const image = ctx.imageManager?.get(splitted.slice(1).join('//'));
             if (!image)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
             img = image;
             break;
         }
         case 'canvas': {
             const canvas = ctx.canvasManager?.get(splitted.slice(1).join('//'));
             if (!canvas)
-                return self.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+                return self.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
             img = await canvas.encode(__1.ImageFormat.png);
             break;
         }
@@ -352,20 +352,20 @@ async function resolveFrame(self, ctx, frame, speed) {
             const img = (meow ? ctx.client.preloadImages : ctx.imageManager)
                 ?.get(meow ? source.slice(10) : source);
             if (!img)
-                return self.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+                return self.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
             return await loadFrame(imageManagerOf(ctx), img, speed);
         }
         case 'canvas': {
             const canvas = ctx.canvasManager?.get(frame.slice(9));
             if (!canvas)
-                return self.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+                return self.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
             return gifsx_1.Frame.fromRgba(canvas.width, canvas.height, Uint8Array.from(canvas.inner.data()), speed);
         }
         default: try {
             return await loadFrame(imageManagerOf(ctx), frame, speed);
         }
         catch (e) {
-            return loaderFailure(self, e, "Failed to load a frame" /* ForgeCanvasError.FrameFail */);
+            return loaderFailure(self, e, "Failed to load a frame" /* ReForgeCanvasError.FrameFail */);
         }
     }
 }

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, WidthOrHeight } from '../..';
+import { ReForgeCanvasError, WidthOrHeight } from '../..';
 
 export default new NativeFunction({
     name: '$canvasSize',
@@ -32,7 +32,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, property]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.inner;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         return this.success(property !== null // @ts-ignore
             ? canvas[WidthOrHeight[

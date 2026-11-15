@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { AttachmentBuilder } from 'discord.js';
 
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$attachGIF',
@@ -35,7 +35,7 @@ export default new NativeFunction({
         const gif = ctx.gifManager?.getEncoder(name);
         filename = `${filename ?? name}.gif`;
         
-        if (!gif) return this.customError(ForgeCanvasError.NoEncoder);
+        if (!gif) return this.customError(ReForgeCanvasError.NoEncoder);
 
         ctx.container.files.push(new AttachmentBuilder(
             Buffer.from(gif.getBuffer()),

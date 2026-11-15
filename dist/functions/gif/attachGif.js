@@ -33,7 +33,7 @@ exports.default = new forgescript_1.NativeFunction({
         const gif = ctx.gifManager?.getEncoder(name);
         filename = `${filename ?? name}.gif`;
         if (!gif)
-            return this.customError("No GIF encoder with provided name found" /* ForgeCanvasError.NoEncoder */);
+            return this.customError("No GIF encoder with provided name found" /* ReForgeCanvasError.NoEncoder */);
         ctx.container.files.push(new discord_js_1.AttachmentBuilder(Buffer.from(gif.getBuffer()), { name: filename }));
         return this.success();
     }

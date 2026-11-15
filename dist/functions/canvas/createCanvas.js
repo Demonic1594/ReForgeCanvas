@@ -51,12 +51,12 @@ exports.default = new forgescript_1.NativeFunction({
         if (!r?.success)
             return r;
         if (!name?.trim()?.length)
-            return this.customError("The name argument cannot be empty" /* ForgeCanvasError.EmptyName */);
+            return this.customError("The name argument cannot be empty" /* ReForgeCanvasError.EmptyName */);
         try {
             (0, __1.checkCanvasSize)(w, h, (0, __1.policyOf)(ctx.client));
         }
         catch (e) {
-            return (0, __1.loaderFailure)(this, e, "This canvas is too large" /* ForgeCanvasError.CanvasTooLarge */, "This canvas is too large" /* ForgeCanvasError.CanvasTooLarge */);
+            return (0, __1.loaderFailure)(this, e, "This canvas is too large" /* ReForgeCanvasError.CanvasTooLarge */, "This canvas is too large" /* ReForgeCanvasError.CanvasTooLarge */);
         }
         const previous = manager.current;
         manager.current = new __1.CanvasBuilder(w, h);

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, ImageFormat } from '../..';
+import { ReForgeCanvasError, ImageFormat } from '../..';
 
 export default new NativeFunction({
     name: '$canvasDataUrl',
@@ -31,7 +31,7 @@ export default new NativeFunction({
     ],
     async execute (ctx, [name, f]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
         return this.success(await canvas.dataUrl(f));
     }
 });

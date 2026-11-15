@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ColorDataType, ForgeCanvasError } from '../..';
+import { ColorDataType, ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$putPixels',
@@ -68,8 +68,8 @@ export default new NativeFunction({
     execute (ctx, [name, pixels, x, y, w, h, t]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
-        if (!Array.isArray(pixels)) return this.customError(ForgeCanvasError.ArrayExpected);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
+        if (!Array.isArray(pixels)) return this.customError(ReForgeCanvasError.ArrayExpected);
 
         canvas.setPixels(x, y, w, h, pixels, t);
         return this.success();

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, RectAlign } from '../..';
+import { ReForgeCanvasError, RectAlign } from '../..';
 
 export default new NativeFunction({
     name: '$rectAlign',
@@ -32,7 +32,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, align]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         return this.success(align !== null
             ? (

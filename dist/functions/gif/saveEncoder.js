@@ -40,14 +40,14 @@ exports.default = new forgescript_1.NativeFunction({
     async execute(ctx, [name, path]) {
         const gif = ctx.gifManager?.getEncoderOrCurrent(name);
         if (!gif)
-            return this.customError("No GIF encoder with provided name found" /* ForgeCanvasError.NoEncoder */);
+            return this.customError("No GIF encoder with provided name found" /* ReForgeCanvasError.NoEncoder */);
         if (!path)
-            return this.customError("No path provided" /* ForgeCanvasError.NoPath */);
+            return this.customError("No path provided" /* ReForgeCanvasError.NoPath */);
         try {
             await (0, __1.writeLocal)(path, gif.getBuffer(), (0, __1.policyOf)(ctx.client));
         }
         catch (e) {
-            return (0, __1.loaderFailure)(this, e, "Failed to save the file" /* ForgeCanvasError.WriteFail */);
+            return (0, __1.loaderFailure)(this, e, "Failed to save the file" /* ReForgeCanvasError.WriteFail */);
         }
         return this.success();
     }

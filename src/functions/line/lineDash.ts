@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$lineDash',
@@ -30,10 +30,10 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, segments]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         if (segments && (!Array.isArray(segments) || !segments.every(x => typeof x === 'number')))
-            return this.customError(ForgeCanvasError.InvalidLineDashSegments);
+            return this.customError(ReForgeCanvasError.InvalidLineDashSegments);
 
         return this.success(segments 
             ? (canvas.setLineDash(segments), undefined)

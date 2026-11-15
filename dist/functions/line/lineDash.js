@@ -30,9 +30,9 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, segments]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         if (segments && (!Array.isArray(segments) || !segments.every(x => typeof x === 'number')))
-            return this.customError("Invalid line dash segments provided (Expected array of numbers)" /* ForgeCanvasError.InvalidLineDashSegments */);
+            return this.customError("Invalid line dash segments provided (Expected array of numbers)" /* ReForgeCanvasError.InvalidLineDashSegments */);
         return this.success(segments
             ? (canvas.setLineDash(segments), undefined)
             : canvas.getLineDash());

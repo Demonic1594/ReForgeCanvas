@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType, Compiler, Interpreter } from '@tryforge/forgescript';
 import { DOMMatrix } from '@napi-rs/canvas';
 
-import { ForgeCanvasError, ReForgeCanvas } from '../..';
+import { ReForgeCanvasError, ReForgeCanvas } from '../..';
 
 export default new NativeFunction({
     name: '$renderCanvasComponent',
@@ -54,11 +54,11 @@ export default new NativeFunction({
     ],
     async execute(ctx, [cname, name, x, y, options]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
         const cctx = canvas.ctx;
 
         const component = ReForgeCanvas.components.get(name);
-        if (!component) return this.customError(ForgeCanvasError.NoComponent);
+        if (!component) return this.customError(ReForgeCanvasError.NoComponent);
 
         let oldmatrix: DOMMatrix | undefined;
         if (x || y) {

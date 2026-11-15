@@ -33,7 +33,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, operation]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         return this.success(operation !== null
             ? (canvas.globalCompositeOperation = (typeof operation === 'number'
                 ? __1.CompositingOperation[operation]

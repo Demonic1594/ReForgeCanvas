@@ -5,7 +5,9 @@
 
 import { ForgeClient, ForgeExtension } from '@tryforge/forgescript';
 import { CanvasManager, ComponentManager, GIFManager, GradientManager, ImageManager, LottieManager, NeuQuantManager } from './classes';
-import { IReForgeCanvasOptions, LoaderPolicy, resolvePolicy, setPolicy } from './structures/loader';
+import { isAbsolute } from 'node:path';
+
+import { IReForgeCanvasOptions, LoaderPolicy, describePath, resolvePolicy, setPolicy } from './structures/loader';
 import { LOG_PREFIX, log, setLogLevel } from './structures/logger';
 
 import * as pkg from '../package.json';
@@ -51,7 +53,8 @@ export class ReForgeCanvas extends ForgeExtension {
         setPolicy(client, this.policy);
         this.load(__dirname + '/functions');
         client.preloadImages = new ImageManager(this.policy);
-        log.debug(`started: network ${this.policy.network.enabled ? 'on' : 'off'}, files.read ${f.read ?? 'off'}, files.write ${f.write ?? 'off'}`);
+        const n = this.policy.network, folder = (dir: string | null, guarded: boolean) => guarded ? 'bot folder (guarded)' : dir ? (isAbsolute(describePath(dir)) ? describePath(dir) : `./${describePath(dir)}`) : 'off';
+        log.info(`${this.version} started: network ${n.enabled ? `on (${n.timeout} ms, ${n.maxBytes} bytes, ${n.maxRedirects} redirects${n.allowedHosts.length ? `, ${n.allowedHosts.length} allowed host(s)` : ''}${n.allowPrivateNetwork ? ', private network allowed' : n.privateAddresses.length ? `, ${n.privateAddresses.length} private address(es) allowed` : ''})` : 'off'}, files.read ${folder(f.read, f.readGuarded)}, files.write ${folder(f.write, f.writeGuarded)}, log level ${this.policy.logLevel}`);
     }
 
     public static components = new ComponentManager();

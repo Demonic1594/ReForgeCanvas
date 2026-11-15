@@ -31,13 +31,13 @@ exports.default = new forgescript_1.NativeFunction({
             switch (option) {
                 case 'type':
                     if (!['normal', 'pie', 'none'].includes(value[0]))
-                        return this.customError("Invalid bar type provided (Expected normal/pie)" /* ForgeCanvasError.InvalidBarType */);
+                        return this.customError("Invalid bar type provided (Expected normal/pie)" /* ReForgeCanvasError.InvalidBarType */);
                     barOptions.type = value[0] !== 'none'
                         ? value[0] : undefined;
                     break;
                 case 'draw-type':
                     if (!['fill', 'stroke', 'clear', 'none'].includes(value[0]))
-                        return this.customError("Invalid rect type provided (Expected fill/stroke/clear)" /* ForgeCanvasError.InvalidRectType */);
+                        return this.customError("Invalid rect type provided (Expected fill/stroke/clear)" /* ReForgeCanvasError.InvalidRectType */);
                     barOptions['draw-type'] = value[0] !== 'none'
                         ? value[0] : undefined;
                     break;
@@ -58,7 +58,7 @@ exports.default = new forgescript_1.NativeFunction({
                     break;
                 case 'background-type':
                     if (!['fill', 'stroke', 'clear', 'none'].includes(value[0]))
-                        return this.customError("Invalid rect type provided (Expected fill/stroke/clear)" /* ForgeCanvasError.InvalidRectType */);
+                        return this.customError("Invalid rect type provided (Expected fill/stroke/clear)" /* ReForgeCanvasError.InvalidRectType */);
                     barOptions['background-type'] = value[0] !== 'none'
                         ? value[0] : undefined;
                     break;
@@ -71,7 +71,7 @@ exports.default = new forgescript_1.NativeFunction({
                 }
                 case 'direction':
                     if (!['horizontal', 'vertical', 'none'].includes(value[0]))
-                        return this.customError("Invalid bar direction provided (Expected horizontal/vertical)" /* ForgeCanvasError.InvalidBarDirection */);
+                        return this.customError("Invalid bar direction provided (Expected horizontal/vertical)" /* ReForgeCanvasError.InvalidBarDirection */);
                     barOptions.direction = value[0] !== 'none'
                         ? value[0] : undefined;
                     break;
@@ -88,7 +88,7 @@ exports.default = new forgescript_1.NativeFunction({
                     break;
                 case 'left-type':
                     if (!['fill', 'stroke', 'clear', 'none'].includes(value[0]))
-                        return this.customError("Invalid rect type provided (Expected fill/stroke/clear)" /* ForgeCanvasError.InvalidRectType */);
+                        return this.customError("Invalid rect type provided (Expected fill/stroke/clear)" /* ReForgeCanvasError.InvalidRectType */);
                     barOptions['left-type'] = value[0] !== 'none'
                         ? value[0] : undefined;
                     break;

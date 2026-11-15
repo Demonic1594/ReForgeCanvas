@@ -51,7 +51,7 @@ exports.default = new forgescript_1.NativeFunction({
                 return (0, __1.loaderFailure)(this, e);
             }
         if (!image)
-            return this.customError("Failed to load an image" /* ForgeCanvasError.ImageFail */);
+            return this.customError("Failed to load an image" /* ReForgeCanvasError.ImageFail */);
         return this.success(property !== null && property !== undefined // @ts-ignore
             ? image[__1.WidthOrHeight[(typeof property === 'string' ? __1.WidthOrHeight[property] : property)]]
             : JSON.stringify({ width: image.width, height: image.height }));

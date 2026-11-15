@@ -53,11 +53,11 @@ exports.default = new forgescript_1.NativeFunction({
     async execute(ctx, [cname, name, x, y, options]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         const cctx = canvas.ctx;
         const component = __1.ReForgeCanvas.components.get(name);
         if (!component)
-            return this.customError("No component with provided name found" /* ForgeCanvasError.NoComponent */);
+            return this.customError("No component with provided name found" /* ReForgeCanvasError.NoComponent */);
         let oldmatrix;
         if (x || y) {
             oldmatrix = cctx.getTransform();

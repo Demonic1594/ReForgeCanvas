@@ -30,7 +30,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, idx]) {
         const nq = ctx.neuquantManager?.get(name);
         if (!nq)
-            return this.customError("No NeuQuant Instance with provided name found" /* ForgeCanvasError.NoNeuQuant */);
+            return this.customError("No NeuQuant Instance with provided name found" /* ReForgeCanvasError.NoNeuQuant */);
         return this.success(nq.lookup(idx));
     }
 });

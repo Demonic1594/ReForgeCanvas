@@ -1,4 +1,4 @@
-export declare const enum ForgeCanvasError {
+export declare const enum ReForgeCanvasError {
     EmptyName = "The name argument cannot be empty",
     NoCanvas = "No canvas with provided name found",
     NoImage = "No image with provided name found",

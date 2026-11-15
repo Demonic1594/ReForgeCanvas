@@ -80,7 +80,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, x, y, rX, rY, rotation, sAngle, eAngle, ccw]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         canvas.ctx.ellipse(x, y, rX, rY, rotation, sAngle, eAngle, ccw ?? false);
         return this.success();
     }

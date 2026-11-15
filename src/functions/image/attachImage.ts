@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { AttachmentBuilder } from 'discord.js';
 
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$attachImage',
@@ -39,7 +39,7 @@ export default new NativeFunction({
         }
         
         const img = manager?.get(name)?.src;
-        if (!img || typeof img === 'string') return this.customError(ForgeCanvasError.NoImage);
+        if (!img || typeof img === 'string') return this.customError(ReForgeCanvasError.NoImage);
         
         ctx.container.files.push(new AttachmentBuilder(
             Buffer.from(img), { name: filename ?? `${name}.png` }

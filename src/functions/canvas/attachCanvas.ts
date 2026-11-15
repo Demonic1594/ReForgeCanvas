@@ -6,7 +6,7 @@
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
 import { AttachmentBuilder } from 'discord.js';
 
-import { ForgeCanvasError, ImageFormat } from '../..';
+import { ReForgeCanvasError, ImageFormat } from '../..';
 
 export default new NativeFunction({
     name: '$attachCanvas',
@@ -40,7 +40,7 @@ export default new NativeFunction({
     ],
     async execute(ctx, [name, file, format]) {
         const canvas = ctx.canvasManager?.get(name)?.inner;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         ctx.container.files.push(new AttachmentBuilder( // @ts-ignore
             await canvas.encode((typeof format === 'number' ? ImageFormat[format] : format) ?? 'png'),

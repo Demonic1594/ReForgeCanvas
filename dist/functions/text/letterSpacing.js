@@ -30,7 +30,7 @@ exports.default = new forgescript_1.NativeFunction({
     async execute(ctx, [name, spacing]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         return this.success(spacing !== undefined && spacing !== null
             ? (canvas.letterSpacing = `${spacing}px`, undefined)
             : canvas.letterSpacing);

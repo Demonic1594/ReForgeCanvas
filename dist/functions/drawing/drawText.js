@@ -123,7 +123,7 @@ exports.default = new forgescript_1.NativeFunction({
     async execute(ctx, [name, t, text, font, style, x, y, maxWidth, multiline, wrap, lineOffset, nlAlign, allowEmojis, brk]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         const valid = (0, __1.validateFont)(font);
         if (!valid || typeof valid === 'string')
             return this.customError(valid);

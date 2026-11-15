@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, FontVariantCaps } from '../..';
+import { ReForgeCanvasError, FontVariantCaps } from '../..';
 
 export default new NativeFunction({
     name: '$fontVariantCaps',
@@ -32,7 +32,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, t]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         return this.success(t !== null && t !== undefined
             ? (canvas.fontVariantCaps = (typeof t === 'number'

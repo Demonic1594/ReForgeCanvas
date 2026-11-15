@@ -9,8 +9,10 @@ exports.envLogLevel = envLogLevel;
 exports.setLogLevel = setLogLevel;
 exports.getLogLevel = getLogLevel;
 // ReForgeCanvas's logger: every line starts with [ReForgeCanvas], and the level comes from the
-// logLevel option or REFORGECANVAS_LOG_LEVEL ("warn" by default). It never prints query strings,
-// tokens or file contents: callers pass describeUrl() for URLs and paths relative to the bot.
+// logLevel option or REFORGECANVAS_LOG_LEVEL ("info" by default, like the other ReForge extensions).
+// info: start-up and configuration; warn: a refused or failed load (one line, with the reason);
+// debug: each load and cache hit; trace: more. It never prints query strings, tokens or file
+// contents: callers pass describeUrl() for URLs and paths relative to the bot.
 const forgescript_1 = require("@tryforge/forgescript");
 exports.LOG_LEVELS = ['silent', 'error', 'warn', 'info', 'debug', 'trace'];
 exports.LOG_PREFIX = '[ReForgeCanvas]';
@@ -18,7 +20,7 @@ function envLogLevel() {
     const v = String(process.env.REFORGECANVAS_LOG_LEVEL ?? '').trim().toLowerCase();
     return exports.LOG_LEVELS.includes(v) ? v : undefined;
 }
-let level = envLogLevel() ?? 'warn';
+let level = envLogLevel() ?? 'info';
 /** Sets the level for the whole process (the last ReForgeCanvas created sets it). */
 function setLogLevel(l) { level = l; }
 function getLogLevel() { return level; }

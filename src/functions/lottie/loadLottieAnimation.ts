@@ -8,7 +8,7 @@ import { LottieAnimation } from '@napi-rs/canvas';
 
 import { resolve as resolvePath } from 'node:path';
 
-import { ForgeCanvasError, LoaderError, LottieManager, assertReadablePath, loaderFailure, policyOf, readLocal, resolveReadPath } from '../..';
+import { ReForgeCanvasError, LoaderError, LottieManager, assertReadablePath, loaderFailure, policyOf, readLocal, resolveReadPath } from '../..';
 
 export default new NativeFunction({
     name: '$loadLottieAnimation',
@@ -57,7 +57,7 @@ export default new NativeFunction({
             }
 
             animation = LottieAnimation.loadFromData(d, base ? { resourcePath: base } : undefined);
-        } catch (e) { return loaderFailure(this, e, ForgeCanvasError.LottieFail) }
+        } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.LottieFail) }
 
         ctx.lottieManager.set(name, animation);
         return this.success();

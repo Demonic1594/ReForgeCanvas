@@ -41,9 +41,9 @@ exports.default = new forgescript_1.NativeFunction({
     async execute(ctx, [name, path, f]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         if (!path)
-            return this.customError("No path provided" /* ForgeCanvasError.NoPath */);
+            return this.customError("No path provided" /* ReForgeCanvasError.NoPath */);
         // CanvasBuilder.encode takes the format name ('png'), not a MIME type ('image/png' threw in 1.3.1)
         const format = (typeof f === 'number' ? __1.ImageFormat[f] : f) ?? 'png';
         if (path.startsWith('images://')) {
@@ -54,7 +54,7 @@ exports.default = new forgescript_1.NativeFunction({
                 await (0, __1.writeLocal)(path, await canvas.encode(format), (0, __1.policyOf)(ctx.client));
             }
             catch (e) {
-                return (0, __1.loaderFailure)(this, e, "Failed to save the file" /* ForgeCanvasError.WriteFail */);
+                return (0, __1.loaderFailure)(this, e, "Failed to save the file" /* ReForgeCanvasError.WriteFail */);
             }
         return this.success();
     }

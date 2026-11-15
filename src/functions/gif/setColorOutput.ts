@@ -6,7 +6,7 @@
 import { ArgType, NativeFunction } from '@tryforge/forgescript';
 import { DecodeOptions } from '@gifsx/gifsx';
 
-import { GIFManager, ColorOutput, ForgeCanvasError } from '../..';
+import { GIFManager, ColorOutput, ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$setColorOutput',
@@ -41,7 +41,7 @@ export default new NativeFunction({
         const options = name
             ? manager.getDecodeOptions(name)
             : manager.currentOptions;
-        if (!options) return this.customError(ForgeCanvasError.NoDecodeOptions);
+        if (!options) return this.customError(ReForgeCanvasError.NoDecodeOptions);
 
         options.setColorOutput(output as unknown as import('@gifsx/gifsx').ColorOutput);
         return this.success();

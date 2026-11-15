@@ -50,7 +50,7 @@ exports.default = new forgescript_1.NativeFunction({
                 return (0, __1.loaderFailure)(this, e);
             }
         if (!image)
-            return this.customError("No image with provided name found" /* ForgeCanvasError.NoImage */);
+            return this.customError("No image with provided name found" /* ReForgeCanvasError.NoImage */);
         ctx.setEnvironmentKey(vname, Buffer.from(image.src));
         return this.success();
     }

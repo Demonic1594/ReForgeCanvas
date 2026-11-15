@@ -56,7 +56,7 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, top, left, right, bottom]) {
         const canvas = ctx.canvasManager?.get(name ?? '') ?? ctx.canvasManager?.current;
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         return this.success(canvas.trim(top !== false, left !== false, right !== false, bottom !== false));
     }
 });

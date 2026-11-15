@@ -117,7 +117,7 @@ function resolvePolicy(options = {}) {
     const write = folder(f.write, 'files.write');
     const hosts = (n.allowedHosts ?? []).map(normaliseHost).filter(Boolean);
     return Object.freeze({
-        logLevel: options.logLevel ?? (0, logger_1.envLogLevel)() ?? 'warn',
+        logLevel: options.logLevel ?? (0, logger_1.envLogLevel)() ?? 'info',
         network: Object.freeze({
             enabled: n.enabled ?? true,
             timeout: num(n.timeout, 10_000, 'network.timeout', 1),

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType, Return } from '@tryforge/forgescript';
-import { ForgeCanvasError, resolveStyle } from '../..';
+import { ReForgeCanvasError, resolveStyle } from '../..';
 
 export default new NativeFunction({
     name: '$stroke',
@@ -31,7 +31,7 @@ export default new NativeFunction({
     ],
     async execute (ctx, [name, style]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         const s = await resolveStyle(this, ctx, canvas, style);
         if (s instanceof Return) return s;

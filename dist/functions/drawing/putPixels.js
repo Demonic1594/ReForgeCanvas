@@ -68,9 +68,9 @@ exports.default = new forgescript_1.NativeFunction({
     execute(ctx, [name, pixels, x, y, w, h, t]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
         if (!canvas)
-            return this.customError("No canvas with provided name found" /* ForgeCanvasError.NoCanvas */);
+            return this.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
         if (!Array.isArray(pixels))
-            return this.customError("Array expected" /* ForgeCanvasError.ArrayExpected */);
+            return this.customError("Array expected" /* ReForgeCanvasError.ArrayExpected */);
         canvas.setPixels(x, y, w, h, pixels, t);
         return this.success();
     }

@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError, TextBaseline } from '../..';
+import { ReForgeCanvasError, TextBaseline } from '../..';
 
 export default new NativeFunction({
     name: '$textBaseline',
@@ -31,7 +31,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, baseline]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name)?.ctx;
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         if (baseline !== null && baseline !== undefined) {
             canvas.textBaseline = (

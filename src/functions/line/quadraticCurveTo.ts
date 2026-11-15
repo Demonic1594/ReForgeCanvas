@@ -4,7 +4,7 @@
 */
 
 import { NativeFunction, ArgType } from '@tryforge/forgescript';
-import { ForgeCanvasError } from '../..';
+import { ReForgeCanvasError } from '../..';
 
 export default new NativeFunction({
     name: '$quadraticCurveTo',
@@ -52,7 +52,7 @@ export default new NativeFunction({
     ],
     execute (ctx, [name, cx, cy, x, y]) {
         const canvas = ctx.canvasManager?.getOrCurrent(name);
-        if (!canvas) return this.customError(ForgeCanvasError.NoCanvas);
+        if (!canvas) return this.customError(ReForgeCanvasError.NoCanvas);
 
         canvas.ctx.quadraticCurveTo(cx, cy, x, y);
         return this.success();
