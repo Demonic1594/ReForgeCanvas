@@ -31,13 +31,13 @@ ReForgeCanvas is a fork of [ForgeCanvas](https://github.com/tryforge/ForgeCanvas
 
 In ReForgeCanvas, every one of those goes through **one loader** with limits that you set:
 
-- 🌐 **Network:** a time limit, a size limit and a redirect cap. Loopback, private, link-local and other non-public addresses are blocked, also after a redirect and after DNS resolution. An optional host allowlist.
-- 📁 **Local files:** off by default, or limited to one folder (paths are normalised, `..` and symbolic links cannot leave it).
-- 💾 **Writes:** `$saveCanvas` and `$saveEncoder` write only inside a folder you choose.
-- 🔤 **Fonts:** a depth and a count limit for stylesheets (Google Fonts and the like). A downloaded stylesheet can never point at a file on your disk.
-- 🧠 **Cache:** the automatic image cache (emojis, URLs, patterns) has a size cap.
-- 🧱 **Size limits:** a canvas, a GIF and a decoded image have a pixel limit, read from the image's header before it is decoded (a 190 KB PNG can otherwise decode to 6 GB).
-- 🤐 **Errors:** users see a generic message (`This source is not allowed`, `This source is too large`, `Failed to load an image`). The detail (address, path, library error) goes to your log with the prefix `[ReForgeCanvas]`; `logLevel` chooses how much.
+- **Network:** a time limit, a size limit and a redirect cap. Loopback, private, link-local and other non-public addresses are blocked, also after a redirect and after DNS resolution. An optional host allowlist.
+- **Local files:** off by default, or limited to one folder (paths are normalised, `..` and symbolic links cannot leave it).
+- **Writes:** `$saveCanvas` and `$saveEncoder` write only inside a folder you choose.
+- **Fonts:** a depth and a count limit for stylesheets (Google Fonts and the like). A downloaded stylesheet can never point at a file on your disk.
+- **Cache:** the automatic image cache (emojis, URLs, patterns) has a size cap.
+- **Size limits:** a canvas, a GIF and a decoded image have a pixel limit, read from the image's header before it is decoded (a 190 KB PNG can otherwise decode to 6 GB).
+- **Errors:** users see a generic message (`This source is not allowed`, `This source is too large`, `Failed to load an image`). The detail (address, path, library error) goes to your log with the prefix `[ReForgeCanvas]`; `logLevel` chooses how much.
 
 <h3 align="center">Installation</h3><hr>
 
