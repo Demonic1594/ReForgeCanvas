@@ -13,7 +13,7 @@ import { promises as fsp } from 'node:fs';
 import { ReForgeCanvasError, CanvasBuilder, Spans, ImageFormat, ImageManager } from '..';
 import {
     LoaderError, LoaderPolicy, OWNER_POLICY, DEFAULT_POLICY, ImageSource,
-    describeUrl, fetchBytes, loadImageFrom, policyOf, readLocal, resolveReadPath, sourceKind
+    checkCanvasSize, describeUrl, fetchBytes, loadImageFrom, policyOf, readLocal, resolveReadPath, sourceKind
 } from './loader';
 import { log as clog } from './logger';
 import { indexedProblem } from './native';
@@ -359,6 +359,14 @@ export function rgbaStringToHex(rgba: string) {
 }
 
 export async function resolveFrame(self: CompiledFunction, ctx: Context, frame: string, speed: number | undefined | null) {
+    // rgba://, hex://, rgb:// and indexed:// frames are text from the command: a malformed one, or data that does
+    // not match its size, makes @gifsx/gifsx throw. That is reported like any other failed frame, so $try catches
+    // it, instead of escaping the function as a stack trace in the log.
+    try { return await buildFrame(self, ctx, frame, speed) }
+    catch (e) { return loaderFailure(self, e, ReForgeCanvasError.FrameFail) }
+}
+
+async function buildFrame(self: CompiledFunction, ctx: Context, frame: string, speed: number | undefined | null) {
     switch (frame.substring(0, frame.indexOf(':'))) {
         case 'rgba': {
             const [size, data] = parseArgs(frame, 'rgba://', 2);
@@ -419,9 +427,8 @@ export async function resolveFrame(self: CompiledFunction, ctx: Context, frame: 
             );
         }
 
-        default: try {
+        default:
             return await loadFrame(imageManagerOf(ctx), frame, speed);
-        } catch (e) { return loaderFailure(self, e, ReForgeCanvasError.FrameFail) }
     }
 }
 
@@ -502,6 +509,7 @@ export async function loadFrame(
     const img = manager ? await manager.load(src)
         : await loadImageFrom(src, DEFAULT_POLICY);
 
+    checkCanvasSize(img.width, img.height, manager?.policy ?? DEFAULT_POLICY, 'frame');
     const canvas = createCanvas(img.width, img.height);
 
     canvas.getContext('2d').drawImage(img, 0, 0);

@@ -43,7 +43,11 @@ export default new NativeFunction({
             : manager.currentOptions;
         if (!options) return this.customError(ReForgeCanvasError.NoDecodeOptions);
 
-        options.setColorOutput(output as unknown as import('@gifsx/gifsx').ColorOutput);
+        // ForgeScript passes a numeric enum by name ("Rgba" for 0), and @gifsx/gifsx needs the number. Its decoder
+        // only knows Rgba and IndexedPixels: Hex (in the enum since ForgeCanvas) is refused with a normal error.
+        const value = typeof output === 'number' ? output : (ColorOutput as unknown as Record<string, number>)[String(output)];
+        try { options.setColorOutput(value as unknown as import('@gifsx/gifsx').ColorOutput) }
+        catch { return this.customError(ReForgeCanvasError.InvalidColorOutput) }
         return this.success();
     }
 });

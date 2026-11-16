@@ -50,24 +50,29 @@ exports.default = new forgescript_1.NativeFunction({
         const f = await (0, __1.resolveFrame)(this, ctx, frame, speed);
         if (f instanceof forgescript_1.Return)
             return f;
-        if (options) {
-            if (typeof options.delay === 'number')
-                f.delay = options.delay;
-            // @ts-expect-error
-            if (options.dispose && gifsx_1.DisposalMethod[options.dispose])
-                f.dispose = options.dispose;
-            if (typeof options.transparent === 'number')
-                f.transparent = options.transparent;
-            if (typeof options.needsUserInput === 'boolean')
-                f.needsUserInput = options.needsUserInput;
-            if (typeof options.top === 'number')
-                f.top = options.top;
-            if (typeof options.left === 'number')
-                f.left = options.left;
-            if (typeof options.interlaced === 'boolean')
-                f.interlaced = options.interlaced;
-            if (Array.isArray(options.palette))
-                f.setPalette(Uint8Array.from(options.palette));
+        try {
+            if (options) {
+                if (typeof options.delay === 'number')
+                    f.delay = options.delay;
+                // @ts-expect-error
+                if (options.dispose && gifsx_1.DisposalMethod[options.dispose])
+                    f.dispose = options.dispose;
+                if (typeof options.transparent === 'number')
+                    f.transparent = options.transparent;
+                if (typeof options.needsUserInput === 'boolean')
+                    f.needsUserInput = options.needsUserInput;
+                if (typeof options.top === 'number')
+                    f.top = options.top;
+                if (typeof options.left === 'number')
+                    f.left = options.left;
+                if (typeof options.interlaced === 'boolean')
+                    f.interlaced = options.interlaced;
+                if (Array.isArray(options.palette))
+                    f.setPalette(Uint8Array.from(options.palette));
+            }
+        }
+        catch (e) {
+            return (0, __1.loaderFailure)(this, e, "The GIF encoder refused this frame" /* ReForgeCanvasError.FrameRejected */);
         }
         try {
             (0, __1.countGifFrame)(gif, f.width * f.height, (0, __1.policyOf)(ctx.client));
@@ -75,7 +80,13 @@ exports.default = new forgescript_1.NativeFunction({
         catch (e) {
             return (0, __1.loaderFailure)(this, e, "This GIF is too large" /* ReForgeCanvasError.GIFTooLarge */, "This GIF is too large" /* ReForgeCanvasError.GIFTooLarge */);
         }
-        gif.addFrame(f);
+        // the encoder checks the frame against the GIF (same size, a palette for indexed frames)
+        try {
+            gif.addFrame(f);
+        }
+        catch (e) {
+            return (0, __1.loaderFailure)(this, e, "The GIF encoder refused this frame" /* ReForgeCanvasError.FrameRejected */);
+        }
         return this.success();
     }
 });

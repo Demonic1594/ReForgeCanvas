@@ -47,7 +47,7 @@ In ReForgeCanvas, every one of those goes through **one loader** with limits tha
     ```
 
     > ℹ️ **Note**\
-    > The compiled code (`dist/`) and `metadata/` are committed, so no build step is needed. The command above follows `main`. To pin a release, add its tag, for example `npm i github:Demonic1594/ReForgeCanvas#v2.0.0`. All releases are listed under [tags](https://github.com/Demonic1594/ReForgeCanvas/tags).
+    > The compiled code (`dist/`) and `metadata/` are committed, so no build step is needed. The command above follows `main`. To pin a release, add its tag, for example `npm i github:Demonic1594/ReForgeCanvas#v2.0.1`. All releases are listed under [tags](https://github.com/Demonic1594/ReForgeCanvas/tags).
 
 2. Add it to your client:
     ```js
@@ -86,7 +86,7 @@ Every option is optional. Each `ForgeClient` gets its own `ReForgeCanvas` instan
 | `fonts.maxFiles` | `100` | Font files one registration may load. |
 | `cache.maxImages` | `500` | Images kept per image manager by the automatic cache. Oldest first out. Images you name with `$loadImage` or `$preloadImage` are never evicted. |
 | `limits.maxCanvasPixels` | `25000000` (e.g. 5000x5000) | Largest `$createCanvas`, `$resizeCanvas` and `$newGIFEncoder`. Encoding a 16000x16000 canvas took 7 s of CPU in 1.3.1. |
-| `limits.maxImagePixels` | `25000000` | Largest image decoded, read from the PNG, JPEG, GIF, WebP, BMP, AVIF or SVG header before decoding. |
+| `limits.maxImagePixels` | `25000000` | Largest image decoded, read from the PNG, JPEG, GIF, WebP, BMP or AVIF header before decoding. An SVG is checked at the size it renders at (any unit, `6e3` too) before anything is drawn from it. |
 | `limits.maxGifFrames` / `limits.maxGifPixels` | `300` / `100000000` | Frames one GIF encoder may hold, and all their pixels together (200 frames of 1000x1000 took 1.7 GB and 5 s in 1.3.1). |
 | `limits.maxEmojisPerText` | `50` | Emoji images one `$drawText` loads; the rest stay text. Each emoji is a request to Discord's CDN. |
 | `logLevel` | `REFORGECANVAS_LOG_LEVEL`, else `info` (as in the other ReForge extensions) | `silent`, `error`, `warn`, `info`, `debug` or `trace` (see the table below). `debug` shows each load (host and path, bytes, ms) and cache hits; query strings, tokens and file contents are never printed. One level for the whole process (the last ReForgeCanvas created sets it). |
@@ -166,7 +166,7 @@ Unchanged: data URIs, inline `<svg>` (checked: @napi-rs/canvas 1.1.1 does not fe
 
 <h3 align="center">Switching from ForgeCanvas</h3><hr>
 
-1. `npm uninstall @tryforge/forge.canvas` and `npm i github:Demonic1594/ReForgeCanvas#v2.0.0`.
+1. `npm uninstall @tryforge/forge.canvas` and `npm i github:Demonic1594/ReForgeCanvas#v2.0.1`.
 2. Change the require: `const { ReForgeCanvas } = require("@tryforge/reforge.canvas")`, and `new ForgeCanvas()` to `new ReForgeCanvas({ ... })`. `ForgeCanvas` is not exported (there is no alias), so code that does `new ForgeCanvas()` must change to `new ReForgeCanvas()`, and its import to `@tryforge/reforge.canvas`. `ForgeCanvas.components` is now `ReForgeCanvas.components`, and TypeScript code that imports the `ForgeCanvasError` enum uses `ReForgeCanvasError`.
 3. If your commands draw local files, set `files.read` (a folder, or `true` for the bot folder with guards); if they save files, set `files.write`. Without it, each refused path is logged with the option to set.
 4. Commands stay the same. The extension registers as `reforge.canvas`, and its log lines start with `[ReForgeCanvas]`.

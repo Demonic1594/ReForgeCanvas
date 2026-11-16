@@ -6,7 +6,7 @@
 import { ArgType, NativeFunction, Return } from '@tryforge/forgescript';
 import { DisposalMethod } from '@gifsx/gifsx';
 
-import { GIFManager, resolveFrame } from '../..';
+import { GIFManager, ReForgeCanvasError, loaderFailure, resolveFrame } from '../..';
 
 export default new NativeFunction({
     name: '$createFrame',
@@ -71,7 +71,10 @@ export default new NativeFunction({
 
             if (typeof options.interlaced === 'boolean') f.interlaced = options.interlaced;
 
-            if (Array.isArray(options.palette)) f.setPalette(Uint8Array.from(options.palette));
+            if (Array.isArray(options.palette)) {
+                try { f.setPalette(Uint8Array.from(options.palette)) }
+                catch (e) { return loaderFailure(this, e, ReForgeCanvasError.FrameRejected) }
+            }
         };
 
         manager.setFrame(name, f);

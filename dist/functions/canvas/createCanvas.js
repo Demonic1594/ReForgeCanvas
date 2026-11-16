@@ -10,6 +10,7 @@ exports.default = new forgescript_1.NativeFunction({
     name: '$createCanvas',
     aliases: ['$newCanvas', '$canvas'],
     description: 'Creates a new canvas',
+    version: '2.0.0',
     brackets: true,
     unwrap: false,
     args: [

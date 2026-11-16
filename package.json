@@ -1,6 +1,6 @@
 {
   "name": "@tryforge/reforge.canvas",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "ReForgeCanvas: a hardened ForgeScript canvas extension. Create and edit images with limits on what user text can fetch, read or write. Fork of tryforge/ForgeCanvas.",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "license": "node dist/@build/license.js",
     "test": "node --expose-gc --test --test-reporter=spec \"test/*.test.js\"",
     "lint": "tsc --noEmit && node scripts/lint.js",
-    "prepublish": "tsc && npm run license && typedoc src/index.ts && node dist/docgen",
+    "docs": "tsc && npm run license && typedoc src/index.ts && node dist/docgen",
     "bot": "swc src -d dist --strip-leading-paths && node --env-file=.env dist/__tests__/index.js"
   },
   "repository": {
@@ -54,6 +54,7 @@
   ],
   "files": [
     "dist/**/*",
+    "!dist/__tests__/**",
     "metadata/**/*",
     "assets/**/*",
     "LICENSE",

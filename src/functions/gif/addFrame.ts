@@ -52,33 +52,36 @@ export default new NativeFunction({
         const f = await resolveFrame(this, ctx, frame, speed);
         if (f instanceof Return) return f;
 
-        if (options) {
-            if (typeof options.delay === 'number') f.delay = options.delay;
+        try {
+            if (options) {
+                if (typeof options.delay === 'number') f.delay = options.delay;
 
-            // @ts-expect-error
-            if (options.dispose && DisposalMethod[options.dispose])
-                f.dispose = options.dispose as DisposalMethod;
+                // @ts-expect-error
+                if (options.dispose && DisposalMethod[options.dispose])
+                    f.dispose = options.dispose as DisposalMethod;
 
-            if (typeof options.transparent === 'number')
-                f.transparent = options.transparent;
+                if (typeof options.transparent === 'number')
+                    f.transparent = options.transparent;
 
-            if (typeof options.needsUserInput === 'boolean')
-                f.needsUserInput = options.needsUserInput;
+                if (typeof options.needsUserInput === 'boolean')
+                    f.needsUserInput = options.needsUserInput;
 
-            if (typeof options.top === 'number')
-                f.top = options.top;
-            if (typeof options.left === 'number')
-                f.left = options.left;
+                if (typeof options.top === 'number')
+                    f.top = options.top;
+                if (typeof options.left === 'number')
+                    f.left = options.left;
 
-            if (typeof options.interlaced === 'boolean')
-                f.interlaced = options.interlaced;
+                if (typeof options.interlaced === 'boolean')
+                    f.interlaced = options.interlaced;
 
-            if (Array.isArray(options.palette))
-                f.setPalette(Uint8Array.from(options.palette));
-        }
+                if (Array.isArray(options.palette))
+                    f.setPalette(Uint8Array.from(options.palette));
+            }
+        } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.FrameRejected) }
 
         try { countGifFrame(gif, f.width * f.height, policyOf(ctx.client)) } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.GIFTooLarge, ReForgeCanvasError.GIFTooLarge) }
-        gif.addFrame(f);
+        // the encoder checks the frame against the GIF (same size, a palette for indexed frames)
+        try { gif.addFrame(f) } catch (e) { return loaderFailure(this, e, ReForgeCanvasError.FrameRejected) }
         return this.success();
     }
 });

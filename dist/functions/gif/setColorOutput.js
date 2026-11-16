@@ -41,7 +41,15 @@ exports.default = new forgescript_1.NativeFunction({
             : manager.currentOptions;
         if (!options)
             return this.customError("No decode options with provided name found" /* ReForgeCanvasError.NoDecodeOptions */);
-        options.setColorOutput(output);
+        // ForgeScript passes a numeric enum by name ("Rgba" for 0), and @gifsx/gifsx needs the number. Its decoder
+        // only knows Rgba and IndexedPixels: Hex (in the enum since ForgeCanvas) is refused with a normal error.
+        const value = typeof output === 'number' ? output : __1.ColorOutput[String(output)];
+        try {
+            options.setColorOutput(value);
+        }
+        catch {
+            return this.customError("GIF decoding supports the color outputs Rgba and IndexedPixels" /* ReForgeCanvasError.InvalidColorOutput */);
+        }
         return this.success();
     }
 });

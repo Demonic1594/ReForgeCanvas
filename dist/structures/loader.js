@@ -306,7 +306,9 @@ function fetchBytes(input, policy, options = {}) {
         };
         const started = Date.now();
         const timer = setTimeout(() => finish(new LoaderError('TIMEOUT', `no complete answer within ${policy.network.timeout} ms`)), policy.network.timeout);
-        const go = (url, hops) => {
+        // Headers the bot set (an API key, a cookie) are for the host it named: a redirect to another
+        // origin is followed without them, as browsers do with credentials.
+        const go = (url, hops, sendHeaders) => {
             try {
                 checkUrl(url, policy, options.extraHosts);
             }
@@ -316,7 +318,7 @@ function fetchBytes(input, policy, options = {}) {
             const lib = url.protocol === 'https:' ? node_https_1.request : node_http_1.request;
             const req = lib(url, {
                 method: 'GET',
-                headers,
+                headers: sendHeaders,
                 agent: false,
                 lookup: safeLookup(policy)
             }, (res) => {
@@ -332,7 +334,7 @@ function fetchBytes(input, policy, options = {}) {
                     catch {
                         return finish(new LoaderError('FAILED', 'invalid redirect location'));
                     }
-                    return go(next, hops + 1);
+                    return go(next, hops + 1, next.origin === url.origin ? sendHeaders : {});
                 }
                 if (status < 200 || status >= 300) {
                     res.resume();
@@ -369,7 +371,7 @@ function fetchBytes(input, policy, options = {}) {
         catch {
             return finish(new LoaderError('FAILED', 'invalid URL'));
         }
-        go(first, 0);
+        go(first, 0, headers);
     });
 }
 /* ---------- local files ---------- */
@@ -561,8 +563,10 @@ async function loadImageFrom(src, policy, loadOptions, fetchOptions = {}) {
     catch (e) {
         throw new LoaderError('FAILED', `could not decode the image: ${e?.message ?? e}`);
     }
-    if (!size && image.width * image.height > max)
-        throw new LoaderError('TOO_LARGE', `the image is ${image.width}x${image.height}, over limits.maxImagePixels ${max}`);
+    // An SVG's header size is only a first guess: width="6e3" or "62.5in" render at 6000 pixels. Loading an
+    // SVG does not rasterize it, so its real size can be checked here before anything is drawn at that size.
+    if ((!size || size.format === 'svg') && !(image.width * image.height <= max))
+        throw new LoaderError('TOO_LARGE', `the image is ${image.width}x${image.height}${size ? ` (${size.format})` : ''}, over limits.maxImagePixels ${max}`);
     return image;
 }
 /** Bytes of a data: URL (base64 or percent-encoded); a malformed one fails like a broken image. */

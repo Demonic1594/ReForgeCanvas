@@ -11,6 +11,7 @@ exports.default = new forgescript_1.NativeFunction({
     name: '$attachCanvas',
     aliases: ['$sendCanvas', '$renderCanvas', '$canvasRender'],
     description: 'Creates a new canvas',
+    version: '2.0.0',
     brackets: true,
     unwrap: true,
     args: [

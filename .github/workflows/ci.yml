@@ -40,7 +40,8 @@ jobs:
             exit 1
           fi
 
-  forgescript-2-5:
+  # the oldest ForgeScript the peer range (^2) allows; 2.2 and 2.4 also pass
+  forgescript-2-0:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,5 +50,5 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm i --no-save --ignore-scripts @tryforge/forgescript@2.5.0
+      - run: npm i --no-save --ignore-scripts @tryforge/forgescript@2.0.0
       - run: npm test
