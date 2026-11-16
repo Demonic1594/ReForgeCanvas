@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.0.1 (November 2026)
+
+Tag [`v2.0.1`](https://github.com/Demonic1594/ReForgeCanvas/releases/tag/v2.0.1). Fixes found in an audit of 2.0.0; each has a test in `test/v2.0.1.test.js` that fails on 2.0.0. Nothing to change in your bot.
+
+### Security
+- **An SVG could get past `limits.maxImagePixels`.** The size was read from the `width`/`height` attributes as plain digits, so `width="6e3"`, `"62.5in"`, `"158.75cm"`, `"4500pt"` or `"375pc"` counted as 6 to 4500 pixels while the SVG renders at 6000. Drawing it stays cheap (an SVG is drawn at the size it lands on the canvas), but a GIF frame made from it (`$addFrame`, `$createFrame` with a URL) allocated a bitmap of the full size: a 120-byte SVG at `8e3` x `8e3` took the bot to 1.1 GB, and a larger one could get the process killed. An SVG is now checked at the size it really renders at, after it is read and before anything is drawn from it, and a frame made from an image is checked against `limits.maxCanvasPixels` before its bitmap is made.
+- **A redirect to another host was sent the headers the bot set** with `$loadImageOptions` (an API key, a cookie). They are now only sent to the host the URL named, as browsers do with credentials; a redirect on the same host keeps them.
+
+### Fixed
+- **Frames typed in a command escaped `$try`.** An `rgba://`, `hex://`, `rgb://` or `indexed://` frame that @gifsx/gifsx rejects (data that does not match the size, no data, a size over 65535, an indexed frame without a palette, a frame of another size than the GIF), and a bad `palette` option, threw inside `$addFrame` and `$createFrame`: ForgeScript logged a stack trace and stopped the command. They are now normal errors (`Failed to load a frame`, `The GIF encoder refused this frame`) that `$try` catches, with the detail in the warn log.
+- **`$setColorOutput` escaped `$try`** with a number (`0`, `1`) or with `Hex`. Numbers now work like `Rgba` and `IndexedPixels`; `Hex`, which the enum has had since ForgeCanvas but GIF decoding never supported, is a normal error.
+- The `logLevel` option's description said the default is `warn`; it is `info`.
+
+### Package
+- `dist/__tests__` (ForgeCanvas's development bot) is no longer in the package.
+- The `prepublish` script is now `docs`: npm ran `prepublish` on every `npm install` in this repository, which rebuilt and rewrote `docs/`. Installing the package in a bot never ran it.
+- CI tests the oldest ForgeScript the peer range allows, 2.0.0 (was 2.5.0). The suite also passes on 2.2.0 and 2.4.1.
+
 ## 2.0.0 (November 2026)
 
 First release of ReForgeCanvas, a fork of ForgeCanvas 1.3.1. The version jumps to 2.0.0 because defaults change: see "Changed".

@@ -325,6 +325,17 @@ function rgbaStringToHex(rgba) {
     ]), false, true)[0];
 }
 async function resolveFrame(self, ctx, frame, speed) {
+    // rgba://, hex://, rgb:// and indexed:// frames are text from the command: a malformed one, or data that does
+    // not match its size, makes @gifsx/gifsx throw. That is reported like any other failed frame, so $try catches
+    // it, instead of escaping the function as a stack trace in the log.
+    try {
+        return await buildFrame(self, ctx, frame, speed);
+    }
+    catch (e) {
+        return loaderFailure(self, e, "Failed to load a frame" /* ReForgeCanvasError.FrameFail */);
+    }
+}
+async function buildFrame(self, ctx, frame, speed) {
     switch (frame.substring(0, frame.indexOf(':'))) {
         case 'rgba': {
             const [size, data] = parseArgs(frame, 'rgba://', 2);
@@ -361,12 +372,8 @@ async function resolveFrame(self, ctx, frame, speed) {
                 return self.customError("No canvas with provided name found" /* ReForgeCanvasError.NoCanvas */);
             return gifsx_1.Frame.fromRgba(canvas.width, canvas.height, Uint8Array.from(canvas.inner.data()), speed);
         }
-        default: try {
+        default:
             return await loadFrame(imageManagerOf(ctx), frame, speed);
-        }
-        catch (e) {
-            return loaderFailure(self, e, "Failed to load a frame" /* ReForgeCanvasError.FrameFail */);
-        }
     }
 }
 /** Emoji images come from a URL the extension builds (digits only), so this host is always allowed. */
@@ -429,6 +436,7 @@ async function parseText(client, text, parseNL, parseEmoji) {
 async function loadFrame(manager, src, speed) {
     const img = manager ? await manager.load(src)
         : await (0, loader_1.loadImageFrom)(src, loader_1.DEFAULT_POLICY);
+    (0, loader_1.checkCanvasSize)(img.width, img.height, manager?.policy ?? loader_1.DEFAULT_POLICY, 'frame');
     const canvas = (0, canvas_1.createCanvas)(img.width, img.height);
     canvas.getContext('2d').drawImage(img, 0, 0);
     return gifsx_1.Frame.fromRgba(canvas.width, canvas.height, Uint8Array.from(canvas.data()), speed);

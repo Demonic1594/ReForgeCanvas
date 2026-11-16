@@ -4,7 +4,7 @@ import { LogLevel } from './logger';
 export { LOG_PREFIX, LOG_LEVELS, LogLevel } from './logger';
 /** Options a bot owner passes to `new ReForgeCanvas({ ... })`. Every field is optional. */
 export interface IReForgeCanvasOptions {
-    /** What ReForgeCanvas prints. Default: REFORGECANVAS_LOG_LEVEL, else "warn" */
+    /** What ReForgeCanvas prints. Default: REFORGECANVAS_LOG_LEVEL, else "info" */
     logLevel?: LogLevel;
     network?: {
         /** Allow http(s) sources at all. Default: true */

@@ -20,7 +20,7 @@ export { LOG_PREFIX, LOG_LEVELS, LogLevel } from './logger';
 
 /** Options a bot owner passes to `new ReForgeCanvas({ ... })`. Every field is optional. */
 export interface IReForgeCanvasOptions {
-    /** What ReForgeCanvas prints. Default: REFORGECANVAS_LOG_LEVEL, else "warn" */
+    /** What ReForgeCanvas prints. Default: REFORGECANVAS_LOG_LEVEL, else "info" */
     logLevel?: LogLevel;
     network?: {
         /** Allow http(s) sources at all. Default: true */
@@ -344,12 +344,14 @@ export function fetchBytes(input: string | URL, policy: LoaderPolicy, options: F
             policy.network.timeout
         );
 
-        const go = (url: URL, hops: number) => {
+        // Headers the bot set (an API key, a cookie) are for the host it named: a redirect to another
+        // origin is followed without them, as browsers do with credentials.
+        const go = (url: URL, hops: number, sendHeaders: Record<string, string>) => {
             try { checkUrl(url, policy, options.extraHosts) } catch (e: any) { return finish(e) }
             const lib = url.protocol === 'https:' ? httpsRequest : httpRequest;
             const req = lib(url, {
                 method: 'GET',
-                headers,
+                headers: sendHeaders,
                 agent: false,
                 lookup: safeLookup(policy) as any
             }, (res: IncomingMessage) => {
@@ -361,7 +363,7 @@ export function fetchBytes(input: string | URL, policy: LoaderPolicy, options: F
                     try { next = new URL(res.headers.location, url) } catch {
                         return finish(new LoaderError('FAILED', 'invalid redirect location'));
                     }
-                    return go(next, hops + 1);
+                    return go(next, hops + 1, next.origin === url.origin ? sendHeaders : {});
                 }
                 if (status < 200 || status >= 300) {
                     res.resume();
@@ -394,7 +396,7 @@ export function fetchBytes(input: string | URL, policy: LoaderPolicy, options: F
 
         let first: URL;
         try { first = new URL(String(input)) } catch { return finish(new LoaderError('FAILED', 'invalid URL')) }
-        go(first, 0);
+        go(first, 0, headers);
     });
 }
 
@@ -583,8 +585,10 @@ export async function loadImageFrom(
     } catch (e: any) {
         throw new LoaderError('FAILED', `could not decode the image: ${e?.message ?? e}`);
     }
-    if (!size && image.width * image.height > max)
-        throw new LoaderError('TOO_LARGE', `the image is ${image.width}x${image.height}, over limits.maxImagePixels ${max}`);
+    // An SVG's header size is only a first guess: width="6e3" or "62.5in" render at 6000 pixels. Loading an
+    // SVG does not rasterize it, so its real size can be checked here before anything is drawn at that size.
+    if ((!size || size.format === 'svg') && !(image.width * image.height <= max))
+        throw new LoaderError('TOO_LARGE', `the image is ${image.width}x${image.height}${size ? ` (${size.format})` : ''}, over limits.maxImagePixels ${max}`);
     return image;
 }
 

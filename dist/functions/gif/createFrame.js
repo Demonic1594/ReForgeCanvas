@@ -66,8 +66,14 @@ exports.default = new forgescript_1.NativeFunction({
                 f.left = options.left;
             if (typeof options.interlaced === 'boolean')
                 f.interlaced = options.interlaced;
-            if (Array.isArray(options.palette))
-                f.setPalette(Uint8Array.from(options.palette));
+            if (Array.isArray(options.palette)) {
+                try {
+                    f.setPalette(Uint8Array.from(options.palette));
+                }
+                catch (e) {
+                    return (0, __1.loaderFailure)(this, e, "The GIF encoder refused this frame" /* ReForgeCanvasError.FrameRejected */);
+                }
+            }
         }
         ;
         manager.setFrame(name, f);

@@ -27,6 +27,8 @@ export declare const enum ReForgeCanvasError {
     NoFrame = "No frame with provided name found",
     NoSizeAndPalette = "No size and palette has been set",
     FrameFail = "Failed to load a frame",
+    FrameRejected = "The GIF encoder refused this frame",
+    InvalidColorOutput = "GIF decoding supports the color outputs Rgba and IndexedPixels",
     NoLottie = "No Lottie animation with provided name found",
     NoBarData = "No bar data provided",
     InvalidBarType = "Invalid bar type provided (Expected normal/pie)",
